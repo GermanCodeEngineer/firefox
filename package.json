@@ -40,7 +40,13 @@
     "yarn": "1.22.22"
   },
   "scripts": {
-    "prepare": "ts-patch install -s"
+    "prepare": "ts-patch install -s",
+    "linux-build": "./mach bootstrap --application-choice browser_artifact_mode && ./mach build",
+    "linux-build-package": "./mach package",
+    "linux-run": "./mach run",
+    "linux-build-run": "npm run linux-build && npm run linux-run",
+    "android-build-run": "echo \"please select '3'\" && ./mach bootstrap && ./mach build && ./mach gradle fenix:assembleDebug && ./mach run --app=fenix",
+    "android-install-build": "./mach build && ./mach android install-fenix"
   },
   "notes(private)": "We don't want to publish to npm, so this is marked as private",
   "private": true
