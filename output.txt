@@ -1,0 +1,263 @@
+ 0:02.48 W Warnings in third-party code are being suppressed from the terminal output. Use --show-all-warnings or --verbose to see them.
+ 0:02.49 W All warnings will still be dumped to /home/neflizard/Dokumente/GitHub/firefox/objdir-frontend/.mozbuild/logs/build/warnings_*.json at the end of the build.
+ 0:04.15 Clobber not needed.
+ 0:04.83 Parallelism determined by memory: using 8 jobs for 8 cores based on 14.9 GiB RAM and estimated job size of 1.0 GiB
+ 0:07.36 W Adding make options from /home/neflizard/Dokumente/GitHub/firefox/mozconfig
+    MOZ_OBJDIR=/home/neflizard/Dokumente/GitHub/firefox/objdir-frontend
+    OBJDIR=/home/neflizard/Dokumente/GitHub/firefox/objdir-frontend
+    FOUND_MOZCONFIG=/home/neflizard/Dokumente/GitHub/firefox/mozconfig
+    export FOUND_MOZCONFIG
+ 0:07.37 /usr/bin/gmake -f client.mk -j8 -s
+ 1:53.76 Using artifact from local cache: /home/neflizard/.mozbuild/package-frontend/12272c6ebb3ce88b-target.common.tests.tar.zst
+ 1:53.76 Using artifact from local cache: /home/neflizard/.mozbuild/package-frontend/eb5b07edb563b2f0-target.xpt_artifacts.zip
+ 1:53.76 Using artifact from local cache: /home/neflizard/.mozbuild/package-frontend/17e166b370e155cf-licenses.json
+ 1:53.77 Using artifact from local cache: /home/neflizard/.mozbuild/package-frontend/4a99852cd70af2be-target.maven.zip
+ 1:53.77 Using artifact from local cache: /home/neflizard/.mozbuild/package-frontend/d3efc6fecb9d2b0d-target.xpt_artifacts.zip
+ 2:08.16 Elapsed: 1.14s; From /home/neflizard/Dokumente/GitHub/firefox/objdir-frontend/dist/bin: Kept 2059 existing; Added/updated 23; Removed 0 files and 0 directories.
+ 2:08.85 ./built_in_addons.json.stub
+ 2:50.97 /home/neflizard/Dokumente/GitHub/firefox/gradlew geckoview:assembleDebug geckoview:assembleDebugAndroidTest messaging_example:assembleDebug port_messaging_example:assembleDebug geckoview:publishDebugPublicationToMavenRepository test_runner:assembleDebug geckoview_example:assembleDebug test_runner:bundleDebug geckoview_example:bundleDebug
+ 2:51.13 W Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=utf-8
+ 3:01.31 Starting a Gradle Daemon, 2 busy and 1 stopped Daemons could not be reused, use --status for details
+ 3:18.38 Configuration on demand is an incubating feature.
+ 3:30.79 Calculating task graph as no cached configuration is available for tasks: geckoview:assembleDebug geckoview:assembleDebugAndroidTest messaging_example:assembleDebug port_messaging_example:assembleDebug geckoview:publishDebugPublicationToMavenRepository test_runner:assembleDebug geckoview_example:assembleDebug test_runner:bundleDebug geckoview_example:bundleDebug
+ 4:20.58 > Configure project :dependencies
+ 4:20.59 The Dependency Analysis plugin is only known to work with versions of AGP between 8.10.0 and 9.3.1. You are using 9.4.1. Proceed at your own risk.
+ 4:27.48 > Task :dependencies:checkKotlinGradlePluginConfigurationErrors SKIPPED
+ 4:27.48 > Task :conventions:checkKotlinGradlePluginConfigurationErrors SKIPPED
+ 4:29.61 > Task :dependencies:pluginDescriptors UP-TO-DATE
+ 4:29.61 > Task :conventions:pluginDescriptors UP-TO-DATE
+ 4:29.68 > Task :dependencies:processResources UP-TO-DATE
+ 4:29.69 > Task :conventions:processResources UP-TO-DATE
+ 4:33.38 > Task :dependencies:compileKotlin
+ 4:33.39 > Task :dependencies:compileJava NO-SOURCE
+ 4:33.39 > Task :dependencies:classes UP-TO-DATE
+ 4:33.78 > Task :dependencies:jar
+ 4:42.29 > Task :conventions:compileKotlin
+ 4:42.29 > Task :conventions:compileJava NO-SOURCE
+ 4:42.29 > Task :conventions:classes UP-TO-DATE
+ 4:42.69 > Task :conventions:jar
+ 4:44.20 SettingsPlugin> Disabled auto-publication of application-services. Enable it by settings 'autoPublish.application-services.dir' in local.properties
+ 4:44.20 SettingsPlugin> Disabled auto-publication of Glean. Enable it by settings 'autoPublish.glean.dir' in local.properties
+ 4:48.39 > Configure project :publicsuffixlist
+ 4:48.39 The Dependency Analysis plugin is only known to work with versions of AGP between 8.10.0 and 9.3.1. You are using 9.4.1. Proceed at your own risk.
+ 4:49.48 > Configure project :
+ 4:56.18 > Task :apksize:checkKotlinGradlePluginConfigurationErrors SKIPPED
+ 4:56.19 > Task :config:checkKotlinGradlePluginConfigurationErrors SKIPPED
+ 4:56.89 > Task :config:pluginDescriptors UP-TO-DATE
+ 4:56.91 > Task :apksize:pluginDescriptors UP-TO-DATE
+ 4:56.91 > Task :config:processResources UP-TO-DATE
+ 4:56.92 > Task :apksize:processResources UP-TO-DATE
+ 4:59.49 > Task :config:compileKotlin
+ 4:59.49 > Task :config:compileJava NO-SOURCE
+ 4:59.49 > Task :config:classes UP-TO-DATE
+ 4:59.59 > Task :config:jar
+ 4:59.89 > Task :apksize:compileKotlin
+ 4:59.90 > Task :apksize:compileJava NO-SOURCE
+ 4:59.98 > Task :apksize:classes UP-TO-DATE
+ 4:59.99 > Task :apksize:jar
+ 5:00.58 > Configure project :
+ 5:00.58 The Dependency Analysis plugin is only known to work with versions of AGP between 8.10.0 and 9.3.1. You are using 9.4.1. Proceed at your own risk.
+ 5:02.78 > Task :apilint:apilint:checkKotlinGradlePluginConfigurationErrors SKIPPED
+ 5:03.28 > Task :apilint:apilint:pluginDescriptors UP-TO-DATE
+ 5:03.28 > Task :apilint:apilint:processResources UP-TO-DATE
+ 5:04.39 > Task :apilint:apidoc-plugin:compileJava
+ 5:04.48 > Task :apilint:apidoc-plugin:processResources NO-SOURCE
+ 5:04.48 > Task :apilint:apidoc-plugin:classes
+ 5:04.48 > Task :apilint:apidoc-plugin:jar
+ 5:04.48 > Task :apilint:apilint:copyDocletJar
+ 5:04.58 > Configure project :geckoview
+ 5:06.18 > Task :apilint:apilint:compileKotlin
+ 5:06.18 > Task :apilint:apilint:compileJava NO-SOURCE
+ 5:06.19 > Task :apilint:apilint:classes
+ 5:06.19 > Task :apilint:apilint:jar
+ 5:06.68 > Configure project :geckoview
+ 5:06.69 W WARNING: The option setting 'android.experimental.enableTestFixturesKotlinSupport=true' is experimental.
+ 5:06.69 The current default is 'false'.
+ 5:06.69 Add android.sync.suppressAgpWarnings=UNSUPPORTED_PROJECT_OPTION_USE to the gradle.properties file to suppress this warning.
+ 5:08.18 > Configure project :annotations
+ 5:08.78 > Configure project :geckoview
+ 5:08.78 GeckoView version = 160.0.20261017144438-SNAPSHOT
+ 5:10.88 > Configure project :messaging_example
+ 5:11.08 > Configure project :port_messaging_example
+ 5:11.28 > Configure project :test_runner
+ 5:11.48 > Configure project :geckoview_example
+ 5:55.28 Maven publication 'debug' pom metadata warnings (silence with 'suppressPomMetadataWarningsFor(variant)'):
+ 5:55.28   - Variant debugVariantDebugApiPublication:
+ 5:55.28       - Declares capability org.mozilla.telemetry:glean-native:70.2.1 which cannot be mapped to Maven
+ 5:55.28       - Declares capability org.mozilla.geckoview:geckoview-default-omni:70.2.1 which cannot be mapped to Maven
+ 5:55.28   - Variant debugVariantDebugRuntimePublication:
+ 5:55.28       - Declares capability org.mozilla.geckoview:geckoview:70.2.1 which cannot be mapped to Maven
+ 5:55.29       - Declares capability org.mozilla.telemetry:glean-native:70.2.1 which cannot be mapped to Maven
+ 5:55.29       - Declares capability org.mozilla.geckoview:geckoview-default-omni:70.2.1 which cannot be mapped to Maven
+ 5:55.29 These issues indicate information that is lost in the published 'pom' metadata file, which may be an issue if the published library is consumed by an old Gradle version or Apache Maven.
+ 5:55.29 The 'module' metadata file, which is used by Gradle 6+ is not affected.
+ 6:12.38 Maven publication 'debug' pom metadata warnings (silence with 'suppressPomMetadataWarningsFor(variant)'):
+ 6:12.38   - Variant debugVariantDebugApiPublication:
+ 6:12.38       - Declares capability org.mozilla.telemetry:glean-native:70.2.1 which cannot be mapped to Maven
+ 6:12.38       - Declares capability org.mozilla.geckoview:geckoview-default-omni:70.2.1 which cannot be mapped to Maven
+ 6:12.38   - Variant debugVariantDebugRuntimePublication:
+ 6:12.38       - Declares capability org.mozilla.geckoview:geckoview:70.2.1 which cannot be mapped to Maven
+ 6:12.38       - Declares capability org.mozilla.telemetry:glean-native:70.2.1 which cannot be mapped to Maven
+ 6:12.38       - Declares capability org.mozilla.geckoview:geckoview-default-omni:70.2.1 which cannot be mapped to Maven
+ 6:12.38 These issues indicate information that is lost in the published 'pom' metadata file, which may be an issue if the published library is consumed by an old Gradle version or Apache Maven.
+ 6:12.38 The 'module' metadata file, which is used by Gradle 6+ is not affected.
+ 6:29.98 W Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=utf-8
+ 6:30.48 W Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=utf-8
+ 6:31.08 W Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=utf-8
+ 6:35.88 Maven publication 'debug' pom metadata warnings (silence with 'suppressPomMetadataWarningsFor(variant)'):
+ 6:35.88   - Variant debugVariantDebugApiPublication:
+ 6:35.88       - Declares capability org.mozilla.telemetry:glean-native:70.2.1 which cannot be mapped to Maven
+ 6:35.88       - Declares capability org.mozilla.geckoview:geckoview-default-omni:70.2.1 which cannot be mapped to Maven
+ 6:35.88   - Variant debugVariantDebugRuntimePublication:
+ 6:35.88       - Declares capability org.mozilla.geckoview:geckoview:70.2.1 which cannot be mapped to Maven
+ 6:35.88       - Declares capability org.mozilla.telemetry:glean-native:70.2.1 which cannot be mapped to Maven
+ 6:35.88       - Declares capability org.mozilla.geckoview:geckoview-default-omni:70.2.1 which cannot be mapped to Maven
+ 6:35.88 These issues indicate information that is lost in the published 'pom' metadata file, which may be an issue if the published library is consumed by an old Gradle version or Apache Maven.
+ 6:35.88 The 'module' metadata file, which is used by Gradle 6+ is not affected.
+ 6:35.89 Maven publication 'debug' pom metadata warnings (silence with 'suppressPomMetadataWarningsFor(variant)'):
+ 6:35.89   - Variant debugVariantDebugApiPublication:
+ 6:35.89       - Declares capability org.mozilla.telemetry:glean-native:70.2.1 which cannot be mapped to Maven
+ 6:35.89       - Declares capability org.mozilla.geckoview:geckoview-default-omni:70.2.1 which cannot be mapped to Maven
+ 6:35.89   - Variant debugVariantDebugRuntimePublication:
+ 6:35.89       - Declares capability org.mozilla.geckoview:geckoview:70.2.1 which cannot be mapped to Maven
+ 6:35.89       - Declares capability org.mozilla.telemetry:glean-native:70.2.1 which cannot be mapped to Maven
+ 6:35.89       - Declares capability org.mozilla.geckoview:geckoview-default-omni:70.2.1 which cannot be mapped to Maven
+ 6:35.89 These issues indicate information that is lost in the published 'pom' metadata file, which may be an issue if the published library is consumed by an old Gradle version or Apache Maven.
+ 6:35.89 The 'module' metadata file, which is used by Gradle 6+ is not affected.
+ 6:47.58 > Task :geckoview:generateDebugAndroidTestAssets UP-TO-DATE
+ 6:47.58 > Task :geckoview:preBuild UP-TO-DATE
+ 6:47.58 > Task :geckoview:preDebugAndroidTestBuild UP-TO-DATE
+ 6:47.59 > Task :messaging_example:preBuild UP-TO-DATE
+ 6:47.59 > Task :port_messaging_example:preBuild UP-TO-DATE
+ 6:47.59 > Task :messaging_example:generateDebugAssets UP-TO-DATE
+ 6:47.59 > Task :geckoview:preDebugBuild UP-TO-DATE
+ 6:47.59 > Task :geckoview:compileDebugAndroidTestAidl NO-SOURCE
+ 6:47.68 > Task :geckoview:processDebugAndroidTestNavigationResources
+ 6:47.69 > Task :geckoview:generateDebugAndroidTestResources
+ 6:47.70 > Task :geckoview:generateDebugBuildConfig
+ 6:47.79 > Task :geckoview:processDebugNavigationResources
+ 6:47.79 > Task :geckoview:generateDebugResources
+ 6:47.79 > Task :geckoview:extractDeepLinksForAarDebug
+ 6:47.79 > Task :geckoview:prepareDebugArtProfile
+ 6:47.88 > Task :geckoview:javaPreCompileDebug
+ 6:47.89 > Task :geckoview:javaPreCompileDebugAndroidTest
+ 6:47.89 > Task :geckoview:writeDebugAarMetadata
+ 6:47.89 > Task :geckoview:extractDeepLinksDebug
+ 6:48.09 > Task :geckoview:packageDebugResources
+ 6:48.09 > Task :geckoview:packageDebugAndroidTestResources
+ 6:49.19 > Task :geckoview:parseDebugLocalResources
+ 6:49.29 > Task :geckoview:parseDebugAndroidTestLocalResources
+ 6:49.38 > Task :geckoview:checkDebugAarMetadata
+ 6:49.38 > Task :geckoview:desugarDebugAndroidTestFileDependencies
+ 6:49.58 > Task :geckoview:checkDebugAndroidTestDuplicateClasses
+ 6:49.68 > Task :geckoview:generateDebugAndroidTestRFile
+ 6:49.69 > Task :geckoview:generateDebugRFile
+ 6:49.69 > Task :geckoview:mapDebugAndroidTestSourceSetPaths
+ 6:49.70 > Task :geckoview:mapDebugSourceSetPaths
+ 6:50.18 > Task :geckoview:checkDebugAndroidTestAarMetadata
+ 6:51.18 > Task :machConfigure
+ 6:51.18  0:01.85 Using Python 3.12.3 from /home/neflizard/.mozbuild/srcdirs/firefox-2dad0ea6e86a/_virtualenvs/build/bin/python
+ 6:51.28  0:02.16 Adding configure options from /home/neflizard/Dokumente/GitHub/firefox/mozconfig
+ 6:51.28  0:02.16   --enable-project=mobile/android
+ 6:51.29  0:02.16   --enable-artifact-builds
+ 6:51.29  0:02.16 checking for vcs source checkout... git
+ 6:51.39 > Task :geckoview:compileDebugAndroidTestNavigationResources
+ 6:51.39 > Task :geckoview:processDebugManifest
+ 6:52.81 > Task :geckoview:compileDebugAidl
+ 6:53.28 > Task :machConfigure
+ 6:53.29  0:03.00 checking for a shell... /usr/bin/sh
+ 6:53.29  0:03.22 checking for host system type... x86_64-pc-linux-gnu
+ 6:53.29  0:03.22 checking for target system type... x86_64-unknown-linux-android
+ 6:53.30  0:03.43 checking whether cross compiling... yes
+ 6:53.30  0:04.10 checking if configuration file confvars.sh exists... /home/neflizard/Dokumente/GitHub/firefox/mobile/android/confvars.sh
+ 6:53.31  0:04.11 checking if configuration file configure.sh exists... /home/neflizard/Dokumente/GitHub/firefox/mobile/android/branding/unofficial/configure.sh
+ 6:53.42  0:04.18 checking for Python 3... /home/neflizard/.mozbuild/srcdirs/firefox-2dad0ea6e86a/_virtualenvs/build/bin/python (3.12.3)
+ 6:53.47  0:04.18 checking for git... /usr/bin/git
+ 6:53.47  0:04.19 checking for Git version... 2.43.0
+ 6:54.52 > Task :geckoview:mergeDebugAndroidTestManifest
+ 6:54.68 > Task :geckoview:compileDebugKotlin NO-SOURCE
+ 7:00.68 > Task :geckoview:generateDebugAndroidTestGlobalSynthetics
+ 7:00.68 > Task :geckoview:processDebugJavaRes NO-SOURCE
+ 7:00.88 > Task :geckoview:mergeDebugAndroidTestJniLibFolders
+ 7:00.98 > Task :geckoview:processDebugAndroidTestManifest
+ 7:01.49 > Task :geckoview:generateDebugAndroidTestBuildConfig
+ 7:02.34 > Task :geckoview:validateSigningDebugAndroidTest
+ 7:03.20 > Task :geckoview:writeDebugAndroidTestSigningConfigVersions
+ 7:03.20 > Task :messaging_example:preDebugBuild UP-TO-DATE
+ 7:03.21 > Task :messaging_example:mergeDebugNativeDebugMetadata NO-SOURCE
+ 7:03.39 > Task :messaging_example:generateDebugResources
+ 7:03.58 > Task :messaging_example:packageDebugResources
+ 7:04.49 > Task :machConfigure
+ 7:04.49  0:15.33 checking for bootstrappable toolchains... 235 found
+ 7:04.69  0:15.57 checking for nodejs... /home/neflizard/.mozbuild/node/bin/node (24.21.0)
+ 7:04.78  0:15.59 checking for tar... /usr/bin/tar
+ 7:04.79  0:15.59 checking for unzip... /usr/bin/unzip
+ 7:04.79  0:15.59 checking for the Mozilla API key... no
+ 7:04.80  0:15.59 checking for the Google Safebrowsing API key... no
+ 7:04.80  0:15.60 checking for the Bing API key... no
+ 7:04.80  0:15.60 checking for the Adjust SDK key... no
+ 7:04.82  0:15.60 checking for the Leanplum SDK key... no
+ 7:04.82  0:15.60 checking for the Pocket API key... no
+ 7:05.39 > Task :geckoview:mergeDebugJavaResource
+ 7:06.38 > Task :messaging_example:processDebugNavigationResources
+ 7:06.78 > Task :machConfigure
+ 7:06.79  0:16.37 checking for Android build-tools... ['/home/neflizard/.mozbuild/android-sdk-linux/build-tools/37.0.0']
+ 7:06.79  0:16.37 checking for Android platform-tools... ['/home/neflizard/.mozbuild/android-sdk-linux/platform-tools']
+ 7:06.79  0:16.37 checking for Android platforms... ['/home/neflizard/.mozbuild/android-sdk-linux/platforms/android-37.2']
+ 7:06.80  0:16.37 checking for Android emulator... ['/home/neflizard/.mozbuild/android-sdk-linux/emulator']
+ 7:06.81  0:16.37 checking for Bundletool... ['/home/neflizard/.mozbuild/bundletool.jar']
+ 7:06.81  0:16.37 checking for AVD... ['/home/neflizard/.mozbuild/android-device/avd']
+ 7:06.81  0:16.37 checking for zipalign... /home/neflizard/.mozbuild/android-sdk-linux/build-tools/37.0.0/zipalign
+ 7:06.81  0:16.47 checking for adb... /home/neflizard/.mozbuild/android-sdk-linux/platform-tools/adb
+ 7:06.81  0:16.48 checking for emulator... /home/neflizard/.mozbuild/android-sdk-linux/emulator/emulator
+ 7:06.81  0:16.49 checking for android.jar... /home/neflizard/.mozbuild/android-sdk-linux/platforms/android-37.2/android.jar
+ 7:06.81  0:16.50 checking for java... /home/neflizard/.mozbuild/jdk/jdk-17.0.20.1+1/bin/java
+ 7:06.81  0:16.52 checking for embedded-uniffi-bindgen... /home/neflizard/.mozbuild/embedded-uniffi-bindgen/embedded-uniffi-bindgen
+ 7:06.82  0:16.55 checking for nimbus-fml... /home/neflizard/.mozbuild/nimbus-fml/nimbus-fml
+ 7:06.82  0:16.57 checking for gmake... /usr/bin/gmake
+ 7:06.82  0:16.73 checking for gmake version... 4.3
+ 7:06.82  0:16.90 checking for watchman... /usr/bin/watchman
+ 7:06.82  0:16.90 checking for watchman version... 4.9.0
+ 7:06.82  0:16.90 checking for xargs... /usr/bin/xargs
+ 7:06.82  0:16.92 Creating config.status
+ 7:07.39 > Task :messaging_example:parseDebugLocalResources
+ 7:08.90 > Task :messaging_example:generateDebugRFile
+ 7:08.90 > Task :machConfigure
+ 7:08.90  0:19.68 Reticulating splines...
+ 7:09.32 > Task :geckoview:compileDebugLibraryResources
+ 7:15.45 > Task :messaging_example:generateDebugGlobalSynthetics
+ 7:15.69 > Task :messaging_example:desugarDebugFileDependencies
+ 7:16.08 > Task :messaging_example:checkDebugAarMetadata
+ 7:16.58 > Task :messaging_example:mapDebugSourceSetPaths
+ 7:19.58 > Task :geckoview:mergeExtDexDebugAndroidTest
+ 7:20.18 > Task :geckoview:mergeDebugAndroidTestResources
+ 7:22.88 > Task :geckoview:extractDebugAnnotations
+ 7:24.68 > Task :geckoview:compileDebugJavaWithJavac
+ 7:35.42 > Task :messaging_example:javaPreCompileDebug
+ 7:44.77 > Task :messaging_example:checkDebugDuplicateClasses
+ 8:07.86 > Task :messaging_example:compileDebugNavigationResources
+ 8:08.89 W The message received from the daemon indicates that the daemon has disappeared.
+ 8:08.89 W Build request sent: Build{id=e07eee41-56d8-4483-8958-7f7501451516, currentDir=/home/neflizard/Dokumente/GitHub/firefox}
+ 8:08.90 W Attempting to read last messages from the daemon log...
+ 8:08.91 W Daemon pid: 8604
+ 8:08.92 W   log file: /home/neflizard/.gradle/daemon/9.8.1/daemon-8604.out.log
+ 8:08.92 W ----- Last 20 lines from daemon log file - daemon-8604.out.log -----
+ 8:08.93 W  0:16.90 checking for watchman version... 4.9.0
+ 8:08.93 W  0:16.90 checking for xargs... /usr/bin/xargs
+ 8:08.94 W  0:16.92 Creating config.status
+ 8:08.94 W  0:19.68 Reticulating splines...
+ 8:09.08 W FAILURE: Build failed with an exception.
+ 8:09.08 W * What went wrong:
+ 8:09.08 W Gradle build daemon disappeared unexpectedly (it may have been killed or may have crashed)
+ 8:09.09 W * Try:
+ 8:09.09 W > Run with --stacktrace option to get the stack trace.
+ 8:09.10 W > Run with --info or --debug option to get more log output.
+ 8:09.10 W > Run with --scan to get full insights from a Build Scan (powered by Develocity).
+ 8:09.11 W > Get more help at https://help.gradle.org.
+ 8:10.51 E gmake[3]: *** [Makefile:100: recurse_android-archive-geckoview] Fehler 1
+ 8:10.53 E gmake[2]: *** [/home/neflizard/Dokumente/GitHub/firefox/config/recurse.mk:34: android-archive-geckoview] Fehler 2
+ 8:10.53 E gmake[1]: *** [/home/neflizard/Dokumente/GitHub/firefox/config/rules.mk:306: default] Fehler 2
+ 8:10.54 E gmake: *** [client.mk:58: build] Fehler 2
+ 8:10.65 W 0 compiler warnings present.
+ 8:10.70 /usr/bin/notify-send '--app-name=Mozilla Build System' 'Mozilla Build System' 'Build failed'
+Streaming resource usage profile to: /home/neflizard/Dokumente/GitHub/firefox/objdir-frontend/.mozbuild/logs/build/profile_log_20261017_151934.json
