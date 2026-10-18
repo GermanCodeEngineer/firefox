@@ -198,9 +198,10 @@ async function browseraction_contextmenu_manage_extension_helper() {
   });
 
   function checkVisibility(menu, visible) {
-    let removeExtension = menu.querySelector(
-      ".customize-context-removeExtension"
-    );
+    let removeExtension =
+      menu.id == UNIFIED_CONTEXT_MENU
+        ? null
+        : menu.querySelector(".customize-context-removeExtension");
     let manageExtension = menu.querySelector(
       ".customize-context-manageExtension"
     );
@@ -211,11 +212,19 @@ async function browseraction_contextmenu_manage_extension_helper() {
 
     info(`Check visibility: ${visible}`);
     let expected = visible ? "visible" : "hidden";
-    is(
-      removeExtension.hidden,
-      !visible,
-      `Remove Extension should be ${expected}`
-    );
+    if (removeExtension) {
+      is(
+        removeExtension.hidden,
+        !visible,
+        `Remove Extension should be ${expected}`
+      );
+    } else {
+      Assert.equal(
+        menu.id,
+        UNIFIED_CONTEXT_MENU,
+        "Remove Extension is only omitted from the unified extensions menu"
+      );
+    }
     is(
       manageExtension.hidden,
       !visible,
@@ -454,15 +463,24 @@ async function browseraction_contextmenu_remove_extension_helper() {
 
   async function testContextMenu(menuId) {
     info(`Open browserAction context menu in ${menuId}`);
-    let confirmArgs = promptService.confirmArgs();
     let menu = await openContextMenu(menuId, buttonId);
 
+    if (menuId == UNIFIED_CONTEXT_MENU) {
+      ok(
+        !menu.querySelector(
+          ".unified-extensions-context-menu-remove-extension"
+        ),
+        "Remove Extension should not be available in the unified extensions menu"
+      );
+      await closeChromeContextMenu(menuId);
+      return menu;
+    }
+
+    let confirmArgs = promptService.confirmArgs();
     info(`Choosing 'Remove Extension' in ${menuId} should show confirm dialog`);
-    let removeItemQuery =
-      menuId == UNIFIED_CONTEXT_MENU
-        ? ".unified-extensions-context-menu-remove-extension"
-        : ".customize-context-removeExtension";
-    let removeExtension = menu.querySelector(removeItemQuery);
+    let removeExtension = menu.querySelector(
+      ".customize-context-removeExtension"
+    );
     await closeChromeContextMenu(menuId, removeExtension);
     let args = await confirmArgs;
     is(args[1], `Remove ${name}?`);

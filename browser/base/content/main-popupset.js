@@ -451,9 +451,6 @@ document.addEventListener(
         case "unified-extensions-context-menu-manage-extension":
           gUnifiedExtensions.manageExtension(event.target.parentElement);
           break;
-        case "unified-extensions-context-menu-remove-extension":
-          gUnifiedExtensions.removeExtension(event.target.parentElement);
-          break;
         case "unified-extensions-context-menu-report-extension":
           gUnifiedExtensions.reportExtension(event.target.parentElement);
           break;

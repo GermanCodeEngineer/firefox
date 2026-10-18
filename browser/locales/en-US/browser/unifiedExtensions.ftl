@@ -42,9 +42,6 @@ unified-extensions-context-menu-pin-to-toolbar =
 unified-extensions-context-menu-manage-extension =
     .label = Manage Extension
 
-unified-extensions-context-menu-remove-extension =
-    .label = Remove Extension
-
 unified-extensions-context-menu-report-extension =
     .label = Report Extension
 

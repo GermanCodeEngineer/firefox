@@ -2853,9 +2853,6 @@ var gUnifiedExtensions = {
     const pinButton = menu.querySelector(
       ".unified-extensions-context-menu-pin-to-toolbar"
     );
-    const removeButton = menu.querySelector(
-      ".unified-extensions-context-menu-remove-extension"
-    );
     const reportButton = menu.querySelector(
       ".unified-extensions-context-menu-report-extension"
     );
@@ -2874,14 +2871,6 @@ var gUnifiedExtensions = {
     }
 
     reportButton.hidden = !gAddonAbuseReportEnabled;
-    // We use this syntax instead of async/await to not block this method that
-    // updates the context menu. This avoids the context menu to be out of sync
-    // on macOS.
-    AddonManager.getAddonByID(id).then(addon => {
-      removeButton.disabled = !(
-        addon.permissions & AddonManager.PERM_CAN_UNINSTALL
-      );
-    });
 
     if (forBrowserAction) {
       let area = CustomizableUI.getPlacementOfWidget(widgetId).area;
@@ -2946,12 +2935,6 @@ var gUnifiedExtensions = {
     const id = this._getExtensionId(menu);
 
     await BrowserAddonUI.manageAddon(id, "unifiedExtensions");
-  },
-
-  async removeExtension(menu) {
-    const id = this._getExtensionId(menu);
-
-    await BrowserAddonUI.removeAddon(id, "unifiedExtensions");
   },
 
   async reportExtension(menu) {

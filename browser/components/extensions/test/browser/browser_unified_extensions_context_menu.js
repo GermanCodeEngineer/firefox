@@ -5,27 +5,11 @@
 
 requestLongerTimeout(2);
 
-const { EnterprisePolicyTesting } = ChromeUtils.importESModule(
-  "resource://testing-common/EnterprisePolicyTesting.sys.mjs"
-);
 loadTestSubscript("head_unified_extensions.js");
 
 // We expect this rejection when the abuse report dialog window is
 // being forcefully closed as part of the related test task.
 PromiseTestUtils.allowMatchingRejectionsGlobally(/report dialog closed/);
-
-const promiseExtensionUninstalled = extensionId => {
-  return new Promise(resolve => {
-    let listener = {};
-    listener.onUninstalled = addon => {
-      if (addon.id == extensionId) {
-        AddonManager.removeAddonListener(listener);
-        resolve();
-      }
-    };
-    AddonManager.addAddonListener(listener);
-  });
-};
 
 function assertVisibleContextMenuItems(contextMenu, expected) {
   let visibleItems = contextMenu.querySelectorAll(
@@ -117,7 +101,7 @@ async function assertMoveContextMenuItems(
     }`
   );
   const expectedVisibleItems =
-    5 + (+(expectMoveUpHidden ? 0 : 1) + (expectMoveDownHidden ? 0 : 1));
+    4 + (+(expectMoveUpHidden ? 0 : 1) + (expectMoveDownHidden ? 0 : 1));
   assertVisibleContextMenuItems(contextMenu, expectedVisibleItems);
   if (expectOrder) {
     assertOrderOfWidgetsInPanel(expectOrder, win);
@@ -207,16 +191,12 @@ add_task(async function test_context_menu() {
     "expected correct l10n attributes for manage button"
   );
 
-  const removeButton = contextMenu.querySelector(
-    ".unified-extensions-context-menu-remove-extension"
-  );
-  ok(removeButton, "expected remove button");
-  is(removeButton.hidden, false, "expected remove button to be visible");
-  is(removeButton.disabled, false, "expected remove button to be enabled");
-  Assert.deepEqual(
-    doc.l10n.getAttributes(removeButton),
-    { id: "unified-extensions-context-menu-remove-extension", args: null },
-    "expected correct l10n attributes for remove button"
+  is(
+    contextMenu.querySelector(
+      ".unified-extensions-context-menu-remove-extension"
+    ),
+    null,
+    "expected no remove extension item"
   );
 
   const reportButton = contextMenu.querySelector(
@@ -262,37 +242,6 @@ add_task(
     await extension.unload();
 
     await SpecialPowers.popPrefEnv();
-  }
-);
-
-add_task(
-  async function test_context_menu_remove_button_disabled_when_extension_cannot_be_uninstalled() {
-    const [extension] = createExtensions([{ name: "an extension" }]);
-    await extension.startup();
-
-    await EnterprisePolicyTesting.setupPolicyEngineWithJson({
-      policies: {
-        Extensions: {
-          Locked: [extension.id],
-        },
-      },
-    });
-
-    // Open the extension panel, then open the context menu for the extension.
-    await openExtensionsPanel();
-    const contextMenu = await openUnifiedExtensionsContextMenu(extension.id);
-
-    const removeButton = contextMenu.querySelector(
-      ".unified-extensions-context-menu-remove-extension"
-    );
-    ok(removeButton, "expected remove button");
-    is(removeButton.disabled, true, "expected remove button to be disabled");
-
-    await closeChromeContextMenu(contextMenu.id, null);
-    await closeExtensionsPanel();
-
-    await extension.unload();
-    await EnterprisePolicyTesting.setupPolicyEngineWithJson("");
   }
 );
 
@@ -375,93 +324,6 @@ add_task(async function test_report_extension() {
   await ext.startup();
   await runReportTest(ext);
   await ext.unload();
-});
-
-add_task(async function test_remove_extension() {
-  const [extension] = createExtensions([{ name: "an extension" }]);
-  await extension.startup();
-
-  // Open the extension panel, then open the context menu for the extension.
-  await openExtensionsPanel();
-  const contextMenu = await openUnifiedExtensionsContextMenu(extension.id);
-
-  const removeButton = contextMenu.querySelector(
-    ".unified-extensions-context-menu-remove-extension"
-  );
-  ok(removeButton, "expected remove button");
-
-  // Set up a mock prompt service that returns 0 to indicate that the user
-  // pressed the OK button.
-  const { prompt } = Services;
-  const promptService = {
-    QueryInterface: ChromeUtils.generateQI(["nsIPromptService"]),
-    confirmEx() {
-      return 0;
-    },
-  };
-  Services.prompt = promptService;
-  registerCleanupFunction(() => {
-    Services.prompt = prompt;
-  });
-
-  // Click the "remove extension" context menu item, and wait until the menu is
-  // closed and the extension is uninstalled.
-  const uninstalled = promiseExtensionUninstalled(extension.id);
-  const hidden = BrowserTestUtils.waitForEvent(contextMenu, "popuphidden");
-  contextMenu.activateItem(removeButton);
-  await Promise.all([uninstalled, hidden]);
-
-  await extension.unload();
-  // Restore prompt service.
-  Services.prompt = prompt;
-});
-
-add_task(async function test_remove_extension_cancelled() {
-  const [extension] = createExtensions([{ name: "an extension" }]);
-  await extension.startup();
-
-  // Open the extension panel, then open the context menu for the extension.
-  await openExtensionsPanel();
-  const contextMenu = await openUnifiedExtensionsContextMenu(extension.id);
-
-  const removeButton = contextMenu.querySelector(
-    ".unified-extensions-context-menu-remove-extension"
-  );
-  ok(removeButton, "expected remove button");
-
-  // Set up a mock prompt service that returns 1 to indicate that the user
-  // refused to uninstall the extension.
-  const { prompt } = Services;
-  const promptService = {
-    QueryInterface: ChromeUtils.generateQI(["nsIPromptService"]),
-    confirmEx() {
-      return 1;
-    },
-  };
-  Services.prompt = promptService;
-  registerCleanupFunction(() => {
-    Services.prompt = prompt;
-  });
-
-  // Click the "remove extension" context menu item, and wait until the menu is
-  // closed.
-  const hidden = BrowserTestUtils.waitForEvent(contextMenu, "popuphidden");
-  contextMenu.activateItem(removeButton);
-  await hidden;
-
-  // Re-open the panel to make sure the extension is still there.
-  await openExtensionsPanel();
-  const item = getUnifiedExtensionsItem(extension.id);
-  is(
-    item.querySelector(".unified-extensions-item-name").textContent,
-    "an extension",
-    "expected extension to still be listed"
-  );
-  await closeExtensionsPanel();
-
-  await extension.unload();
-  // Restore prompt service.
-  Services.prompt = prompt;
 });
 
 add_task(async function test_open_context_menu_on_click() {
@@ -564,7 +426,7 @@ add_task(async function test_context_menu_without_browserActionFor_global() {
   // This promise rejects with an error if the implementation does not handle
   // the case where `global.browserActionFor()` is undefined.
   const contextMenu = await openUnifiedExtensionsContextMenu(extension.id);
-  assertVisibleContextMenuItems(contextMenu, 3);
+  assertVisibleContextMenuItems(contextMenu, 2);
 
   await closeChromeContextMenu(contextMenu.id, null);
   await closeExtensionsPanel();
@@ -613,14 +475,14 @@ add_task(async function test_page_action_context_menu() {
   let contextMenu = await openUnifiedExtensionsContextMenu(
     extWithMenuPageAction.id
   );
-  assertVisibleContextMenuItems(contextMenu, 3);
+  assertVisibleContextMenuItems(contextMenu, 2);
   await closeChromeContextMenu(contextMenu.id, null);
 
   info("extension with no browser action and no menu");
   // There is no context menu created by this extension, so there should only
-  // be 3 menu items corresponding to the default manage/remove/report items.
+  // be 2 menu items corresponding to the default manage/report items.
   contextMenu = await openUnifiedExtensionsContextMenu(extWithoutMenu1.id);
-  assertVisibleContextMenuItems(contextMenu, 3);
+  assertVisibleContextMenuItems(contextMenu, 2);
   await closeChromeContextMenu(contextMenu.id, null);
 
   await closeExtensionsPanel();
