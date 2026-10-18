@@ -45,7 +45,7 @@
     "linux-build-package": "./mach package",
     "linux-run": "./mach run",
     "linux-build-run": "npm run linux-build && npm run linux-run",
-    "android-build-run": "echo \"please select '3'\" && ./mach bootstrap && ./mach build && ./mach gradle fenix:assembleDebug && ./mach run --app=fenix",
+    "android-build-run": "./mach --no-interactive bootstrap --application-choice=\"GeckoView/Firefox for Android\" && ./mach build && ./mach gradle fenix:assembleDebug && ./mach run --app=fenix",
     "android-install-build": "./mach build && ./mach android install-fenix"
   },
   "notes(private)": "We don't want to publish to npm, so this is marked as private",
