@@ -174,3 +174,9 @@ export async function requestAdminMode() {
     );
   });
 }
+
+export const ManagementRestrictions = {
+  ensureAdminModeEnabled,
+  isAdminModeEnabled,
+  setAdminModeEnabledByUser,
+};
