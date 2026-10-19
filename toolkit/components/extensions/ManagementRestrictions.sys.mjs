@@ -2,10 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { AddonManager } from "resource://gre/modules/AddonManager.sys.mjs";
+import { AddonManager as FirefoxAddonManager } from "resource://gre/modules/AddonManager.sys.mjs";
 import { ExtensionParent } from "resource://gre/modules/ExtensionParent.sys.mjs";
+import { setTimeout, clearTimeout } from "resource://gre/modules/Timer.sys.mjs";
 
-const Services = globalThis.Services;
 const ADMIN_MODE_PREF = "extensions.managementRestrictions.adminMode";
 const CONTROLLER_ID_PREF = "extensions.managementRestrictions.controllerId";
 const REQUEST_TOPIC = "webextension-admin-mode-request";
@@ -22,15 +22,10 @@ function getControllerId() {
 }
 
 async function findActiveControllerId() {
-  const addons = await AddonManager.getAllAddons();
   return (
-    addons.find(addon => {
-      const extension = ExtensionParent.GlobalManager.getExtension(addon.id);
-      return (
-        addon.isActive &&
-        extension?.permissions.has("managementRestrictions")
-      );
-    })?.id ?? ""
+    Array.from(ExtensionParent.GlobalManager.extensionMap.values()).find(
+      extension => extension.permissions.has("managementRestrictions")
+    )?.id ?? ""
   );
 }
 
@@ -49,8 +44,20 @@ function registerAddonListener() {
     return;
   }
   addonListenerRegistered = true;
-  AddonManager.addAddonListener({
+  FirefoxAddonManager.addAddonListener({
+    onDisabling(addon) {
+      if (addon.id === getControllerId()) {
+        setAdminModeEnabled(true);
+      }
+      finishPendingRequestsForController(addon.id);
+    },
     onDisabled(addon) {
+      if (addon.id === getControllerId()) {
+        setAdminModeEnabled(true);
+      }
+      finishPendingRequestsForController(addon.id);
+    },
+    onUninstalling(addon) {
       if (addon.id === getControllerId()) {
         setAdminModeEnabled(true);
       }
@@ -98,8 +105,7 @@ export async function setAdminModeEnabledByUser(enabled) {
     return requestAdminMode();
   }
 
-  const controllerId =
-    getControllerId() || (await findActiveControllerId());
+  const controllerId = getControllerId() || (await findActiveControllerId());
   const extension = controllerId
     ? ExtensionParent.GlobalManager.getExtension(controllerId)
     : null;
@@ -118,9 +124,7 @@ export async function requestAdminMode() {
     setAdminModeEnabled(true);
     return true;
   }
-  const requestId = `${Services.uuid.generateUUID().toString()}-${
-    ++requestCounter
-  }`;
+  const requestId = `${Services.uuid.generateUUID().toString()}-${++requestCounter}`;
 
   return new Promise(resolve => {
     let settled = false;

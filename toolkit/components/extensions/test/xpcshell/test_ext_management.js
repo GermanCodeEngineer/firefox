@@ -180,19 +180,16 @@ add_task(async function test_admin_mode_request_api() {
 });
 
 add_task(async function test_admin_mode_enforcement_and_recovery() {
-  const { isAdminModeEnabled, requestAdminMode } = ChromeUtils.importESModule(
-    "resource://gre/modules/ManagementRestrictions.sys.mjs"
-  );
-  Services.prefs.clearUserPref(
-    "extensions.managementRestrictions.adminMode"
-  );
+  const { ensureAdminModeEnabled, isAdminModeEnabled, requestAdminMode } =
+    ChromeUtils.importESModule(
+      "resource://gre/modules/ManagementRestrictions.sys.mjs"
+    );
+  Services.prefs.clearUserPref("extensions.managementRestrictions.adminMode");
   Services.prefs.clearUserPref(
     "extensions.managementRestrictions.controllerId"
   );
   registerCleanupFunction(() => {
-    Services.prefs.clearUserPref(
-      "extensions.managementRestrictions.adminMode"
-    );
+    Services.prefs.clearUserPref("extensions.managementRestrictions.adminMode");
     Services.prefs.clearUserPref(
       "extensions.managementRestrictions.controllerId"
     );
@@ -216,16 +213,13 @@ add_task(async function test_admin_mode_enforcement_and_recovery() {
       browser.test.onMessage.addListener(async () => {
         for (const [name, call] of [
           [
-            "setEnabled",
-            () => browser.management.setEnabled("missing", true),
-          ],
-          [
             "install",
             () =>
               browser.management.install({
                 url: "https://example.invalid/test.xpi",
               }),
           ],
+          ["setEnabled", () => browser.management.setEnabled("missing", true)],
           ["uninstallSelf", () => browser.management.uninstallSelf()],
         ]) {
           try {
@@ -254,7 +248,7 @@ add_task(async function test_admin_mode_enforcement_and_recovery() {
   await caller.awaitMessage("management-actions-rejected");
 
   await controller.unload();
-  await TestUtils.waitForCondition(isAdminModeEnabled);
+  await ensureAdminModeEnabled();
   equal(isAdminModeEnabled(), true, "Removing the controller fails open");
 
   const unresponsiveController = ExtensionTestUtils.loadExtension({

@@ -11,9 +11,10 @@ ChromeUtils.defineLazyGetter(this, "strBundle", function () {
 });
 ChromeUtils.defineESModuleGetters(this, {
   AddonManager: "resource://gre/modules/AddonManager.sys.mjs",
-  ManagementRestrictions:
-    "resource://gre/modules/ManagementRestrictions.sys.mjs",
 });
+const { ensureAdminModeEnabled: ensureAdminMode } = ChromeUtils.importESModule(
+  "resource://gre/modules/ManagementRestrictions.sys.mjs"
+);
 
 // We can't use Services.prompt here at the moment, as tests need to mock
 // the prompt service. We could use sinon, but that didn't seem to work
@@ -39,7 +40,7 @@ const _ = (key, ...args) => {
 };
 
 async function ensureAdminModeEnabled() {
-  if (!(await ManagementRestrictions.ensureAdminModeEnabled())) {
+  if (!(await ensureAdminMode())) {
     throw new ExtensionError("Admin Mode is off");
   }
 }
