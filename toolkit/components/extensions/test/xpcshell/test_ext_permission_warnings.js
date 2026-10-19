@@ -152,6 +152,30 @@ add_task(async function permission_message_consistence() {
   }
 });
 
+add_task(async function management_restrictions_permission_warning() {
+  const manifestPermissions = await getManifestPermissions({
+    manifest: {
+      permissions: ["managementRestrictions"],
+    },
+  });
+  deepEqual(
+    manifestPermissions.permissions,
+    ["managementRestrictions"],
+    "The managementRestrictions permission is recognized in the manifest"
+  );
+
+  const { warnings } = getPermissionWarnings(manifestPermissions);
+  deepEqual(
+    warnings,
+    [
+      l10n.formatValueSync(
+        "webext-perms-description-managementRestrictions"
+      ),
+    ],
+    "The permission has a localized installation warning"
+  );
+});
+
 // Tests that the expected permission warnings are generated for various
 // combinations of host permissions.
 add_task(async function host_permissions() {

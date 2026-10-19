@@ -179,6 +179,101 @@ add_task(async function test_admin_mode_request_api() {
   await extension.unload();
 });
 
+add_task(async function test_admin_mode_enforcement_and_recovery() {
+  const { isAdminModeEnabled, requestAdminMode } = ChromeUtils.importESModule(
+    "resource://gre/modules/ManagementRestrictions.sys.mjs"
+  );
+  Services.prefs.clearUserPref(
+    "extensions.managementRestrictions.adminMode"
+  );
+  Services.prefs.clearUserPref(
+    "extensions.managementRestrictions.controllerId"
+  );
+  registerCleanupFunction(() => {
+    Services.prefs.clearUserPref(
+      "extensions.managementRestrictions.adminMode"
+    );
+    Services.prefs.clearUserPref(
+      "extensions.managementRestrictions.controllerId"
+    );
+  });
+
+  const controller = ExtensionTestUtils.loadExtension({
+    manifest: {
+      permissions: ["managementRestrictions"],
+    },
+    background() {
+      browser.management.onAdminModeRequest.addListener(({ requestId }) => {
+        browser.management.respondToAdminModeRequest(requestId, false);
+      });
+    },
+  });
+  const caller = ExtensionTestUtils.loadExtension({
+    manifest: {
+      permissions: ["management"],
+    },
+    background() {
+      browser.test.onMessage.addListener(async () => {
+        for (const [name, call] of [
+          [
+            "setEnabled",
+            () => browser.management.setEnabled("missing", true),
+          ],
+          [
+            "install",
+            () =>
+              browser.management.install({
+                url: "https://example.invalid/test.xpi",
+              }),
+          ],
+          ["uninstallSelf", () => browser.management.uninstallSelf()],
+        ]) {
+          try {
+            await call();
+            browser.test.fail(`management.${name} should be rejected`);
+          } catch (error) {
+            browser.test.assertEq("Admin Mode is off", error.message);
+          }
+        }
+        browser.test.sendMessage("management-actions-rejected");
+      });
+      browser.test.sendMessage("ready");
+    },
+  });
+
+  await controller.startup();
+  await caller.startup();
+  await caller.awaitMessage("ready");
+
+  equal(await requestAdminMode(), false, "The controller can deny Admin Mode");
+  equal(isAdminModeEnabled(), false, "A denial persists the locked state");
+
+  await withHandlingUserInput(caller, async () => {
+    caller.sendMessage("check-management-actions");
+  });
+  await caller.awaitMessage("management-actions-rejected");
+
+  await controller.unload();
+  await TestUtils.waitForCondition(isAdminModeEnabled);
+  equal(isAdminModeEnabled(), true, "Removing the controller fails open");
+
+  const unresponsiveController = ExtensionTestUtils.loadExtension({
+    manifest: {
+      permissions: ["managementRestrictions"],
+    },
+    background() {},
+  });
+  await unresponsiveController.startup();
+  equal(
+    await requestAdminMode(),
+    true,
+    "An unresponsive controller fails open after the timeout"
+  );
+  equal(isAdminModeEnabled(), true, "The timeout persists the unlocked state");
+  await unresponsiveController.unload();
+  await caller.unload();
+});
+
 add_task(async function test_management_getAll() {
   const id1 = "get_all_test1@tests.mozilla.com";
   const id2 = "get_all_test2@tests.mozilla.com";

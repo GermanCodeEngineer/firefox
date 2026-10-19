@@ -7,7 +7,7 @@
         "choices": [
           {
             "type": "string",
-            "enum": ["management"]
+            "enum": ["management", "managementRestrictions"]
           }
         ]
       }

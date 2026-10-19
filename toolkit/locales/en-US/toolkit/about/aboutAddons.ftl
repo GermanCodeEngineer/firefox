@@ -4,6 +4,10 @@
 
 addons-page-title = Add-ons Manager
 
+addons-admin-mode-label = Admin Mode
+addons-admin-mode-toggle =
+    .label = Admin Mode
+
 search-header =
     .placeholder = Search addons.mozilla.org
     .searchbuttonlabel = Search

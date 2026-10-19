@@ -4,6 +4,10 @@
 
 import { AboutAddonsHTMLElement } from "../aboutaddons-utils.mjs";
 
+const { ManagementRestrictions } = ChromeUtils.importESModule(
+  "resource://gre/modules/ManagementRestrictions.sys.mjs"
+);
+
 class AddonPageHeader extends AboutAddonsHTMLElement {
   static get markup() {
     return `
@@ -29,6 +33,15 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
             ></moz-button>
             <h1 class="header-name"></h1>
             <div class="spacer"></div>
+            <div class="admin-mode-control">
+              <span
+                data-l10n-id="addons-admin-mode-label"
+              ></span>
+              <moz-toggle
+                class="admin-mode-toggle"
+                data-l10n-id="addons-admin-mode-toggle"
+              ></moz-toggle>
+            </div>
             <addon-updates-message
               id="updates-message"
               hidden
@@ -54,6 +67,7 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
       this.appendChild(AddonPageHeader.fragment);
       this.heading = this.querySelector(".header-name");
       this.backButton = this.querySelector(".back-button");
+      this.adminModeToggle = this.querySelector(".admin-mode-toggle");
       this.pageOptionsMenuButton = this.querySelector(".more-options-button");
 
       // The addon-page-options element is outside of this element since this is
@@ -72,6 +86,15 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
               this.pageOptionsMenu.panelListId)
         );
     }
+    this.adminModeToggle.addEventListener("toggle", this);
+    this.adminModeObserver = {
+      observe: () => this.updateAdminModeToggle(),
+    };
+    Services.obs.addObserver(
+      this.adminModeObserver,
+      "webextension-admin-mode-changed"
+    );
+    this.updateAdminModeToggle();
     document.addEventListener("view-selected", this);
     this.addEventListener("click", this);
   }
@@ -79,6 +102,16 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
   disconnectedCallback() {
     document.removeEventListener("view-selected", this);
     this.removeEventListener("click", this);
+    this.adminModeToggle.removeEventListener("toggle", this);
+    Services.obs.removeObserver(
+      this.adminModeObserver,
+      "webextension-admin-mode-changed"
+    );
+  }
+
+  updateAdminModeToggle() {
+    this.adminModeToggle.pressed =
+      ManagementRestrictions.isAdminModeEnabled();
   }
 
   setViewInfo({ type, param }) {
@@ -97,7 +130,20 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
     }
   }
 
-  handleEvent(e) {
+  async handleEvent(e) {
+    if (e.type === "toggle" && e.target === this.adminModeToggle) {
+      this.adminModeToggle.disabled = true;
+      try {
+        await ManagementRestrictions.setAdminModeEnabledByUser(
+          this.adminModeToggle.pressed
+        );
+      } finally {
+        this.updateAdminModeToggle();
+        this.adminModeToggle.disabled = false;
+      }
+      return;
+    }
+
     if (e.type === "click") {
       switch (e.target) {
         case this.backButton:

@@ -24,8 +24,65 @@ const { XPCOMUtils } = ChromeUtils.importESModule(
 
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
+  ManagementRestrictions:
+    "resource://gre/modules/ManagementRestrictions.sys.mjs",
   recordDetailsViewTelemetry: "chrome://global/content/ml/Utils.sys.mjs",
 });
+
+const ADMIN_MODE_RESTRICTED_ACTIONS = new Set([
+  "install-addon",
+  "install-from-file",
+  "install-update",
+  "install-postponed",
+  "remove",
+  "toggle-disabled",
+  "always-activate",
+  "never-activate",
+]);
+
+function updateAdminModeControls(root = document) {
+  const enabled = lazy.ManagementRestrictions.isAdminModeEnabled();
+  document.body.toggleAttribute("admin-mode-disabled", !enabled);
+
+  const controls = [];
+  if (root instanceof Element && root.hasAttribute("action")) {
+    controls.push(root);
+  }
+  controls.push(...(root.querySelectorAll?.("[action]") ?? []));
+  for (const control of controls) {
+    if (!ADMIN_MODE_RESTRICTED_ACTIONS.has(control.getAttribute("action"))) {
+      continue;
+    }
+    if (!enabled) {
+      if (!control.hasAttribute("data-admin-mode-disabled")) {
+        control.setAttribute(
+          "data-admin-mode-disabled",
+          String(control.disabled)
+        );
+      }
+      control.disabled = true;
+    } else if (control.hasAttribute("data-admin-mode-disabled")) {
+      control.disabled =
+        control.getAttribute("data-admin-mode-disabled") === "true";
+      control.removeAttribute("data-admin-mode-disabled");
+    }
+  }
+}
+
+function blockRestrictedAction(event) {
+  if (lazy.ManagementRestrictions.isAdminModeEnabled()) {
+    return;
+  }
+  const control = event.composedPath().find(
+    node =>
+      node instanceof Element &&
+      ADMIN_MODE_RESTRICTED_ACTIONS.has(node.getAttribute("action"))
+  );
+  if (control) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
+}
 
 XPCOMUtils.defineLazyPreferenceGetter(
   lazy,
@@ -223,6 +280,52 @@ async function initialize() {
     },
     { once: true }
   );
+
+  const adminModeObserver = {
+    observe() {
+      updateAdminModeControls();
+    },
+  };
+  Services.obs.addObserver(
+    adminModeObserver,
+    "webextension-admin-mode-changed"
+  );
+  const adminModeMutationObserver = new MutationObserver(records => {
+    for (const record of records) {
+      if (record.type === "attributes") {
+        updateAdminModeControls(record.target);
+      } else {
+        for (const node of record.addedNodes) {
+          if (node instanceof Element) {
+            updateAdminModeControls(node);
+          }
+        }
+      }
+    }
+  });
+  adminModeMutationObserver.observe(document.body, {
+    attributes: true,
+    attributeFilter: ["disabled"],
+    childList: true,
+    subtree: true,
+  });
+  document.addEventListener("click", blockRestrictedAction, true);
+  document.addEventListener("toggle", blockRestrictedAction, true);
+  window.addEventListener(
+    "unload",
+    () => {
+      Services.obs.removeObserver(
+        adminModeObserver,
+        "webextension-admin-mode-changed"
+      );
+      adminModeMutationObserver.disconnect();
+      document.removeEventListener("click", blockRestrictedAction, true);
+      document.removeEventListener("toggle", blockRestrictedAction, true);
+    },
+    { once: true }
+  );
+  await lazy.ManagementRestrictions.ensureAdminModeEnabled();
+  updateAdminModeControls();
 
   // Init UI and view management
   gViewController.initialize(document.getElementById("main"));

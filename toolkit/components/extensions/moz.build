@@ -42,6 +42,7 @@ EXTRA_JS_MODULES += [
     "ExtensionUtils.sys.mjs",
     "ExtensionWorkerChild.sys.mjs",
     "FindContent.sys.mjs",
+    "ManagementRestrictions.sys.mjs",
     "MatchURLFilters.sys.mjs",
     "MessageManagerProxy.sys.mjs",
     "NativeManifests.sys.mjs",

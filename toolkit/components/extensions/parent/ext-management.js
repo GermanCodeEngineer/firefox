@@ -11,6 +11,8 @@ ChromeUtils.defineLazyGetter(this, "strBundle", function () {
 });
 ChromeUtils.defineESModuleGetters(this, {
   AddonManager: "resource://gre/modules/AddonManager.sys.mjs",
+  ManagementRestrictions:
+    "resource://gre/modules/ManagementRestrictions.sys.mjs",
 });
 
 // We can't use Services.prompt here at the moment, as tests need to mock
@@ -35,6 +37,12 @@ const _ = (key, ...args) => {
   }
   return strBundle.GetStringFromName(key);
 };
+
+async function ensureAdminModeEnabled() {
+  if (!(await ManagementRestrictions.ensureAdminModeEnabled())) {
+    throw new ExtensionError("Admin Mode is off");
+  }
+}
 
 const installType = addon => {
   if (addon.temporarilyInstalled) {
@@ -203,7 +211,7 @@ this.management = class extends ExtensionAPIPersistent {
       let { extension } = this;
       let observer = subject => {
         let { extensionId, requestId } = subject.wrappedJSObject;
-        if (extensionId == extension.id) {
+        if (extensionId == "*" || extensionId == extension.id) {
           fire.async({ requestId });
         }
       };
@@ -265,6 +273,8 @@ this.management = class extends ExtensionAPIPersistent {
         },
 
         async install({ url, hash }) {
+          await ensureAdminModeEnabled();
+
           let listener = {
             onDownloadEnded(install) {
               if (install.addon.appDisabled || install.addon.type !== "theme") {
@@ -300,6 +310,8 @@ this.management = class extends ExtensionAPIPersistent {
         },
 
         async uninstallSelf(options) {
+          await ensureAdminModeEnabled();
+
           if (options && options.showConfirmDialog) {
             let message = _("uninstall.confirmation.message", extension.name);
             if (options.dialogMessage) {
@@ -337,6 +349,8 @@ this.management = class extends ExtensionAPIPersistent {
         },
 
         async setEnabled(id, enabled) {
+          await ensureAdminModeEnabled();
+
           let addon = await AddonManager.getAddonByID(id);
           if (!addon) {
             throw new ExtensionError(`No such addon ${id}`);

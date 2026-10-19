@@ -4,6 +4,10 @@
 
 import { getBrowserElement } from "../aboutaddons-utils.mjs";
 
+const { ManagementRestrictions } = ChromeUtils.importESModule(
+  "resource://gre/modules/ManagementRestrictions.sys.mjs"
+);
+
 const { AddonManager } = ChromeUtils.importESModule(
   "resource://gre/modules/AddonManager.sys.mjs"
 );
@@ -39,12 +43,18 @@ class DragDropAddonInstaller extends HTMLElement {
   }
 
   handleEvent(e) {
-    if (!lazy.XPINSTALL_ENABLED) {
+    if (
+      !lazy.XPINSTALL_ENABLED
+    ) {
       // Nothing to do if we can't install add-ons.
       return;
     }
 
     if (e.type == "drop" && this.canInstallFromEvent(e)) {
+      if (!ManagementRestrictions.isAdminModeEnabled()) {
+        e.preventDefault();
+        return;
+      }
       this.onDrop(e);
     }
   }

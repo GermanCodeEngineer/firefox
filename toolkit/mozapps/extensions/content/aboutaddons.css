@@ -145,6 +145,13 @@ search-addons {
   flex-grow: 1;
 }
 
+.admin-mode-control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-small);
+  margin-inline-end: var(--space-medium);
+}
+
 #updates-message {
   display: flex;
   align-items: center;
