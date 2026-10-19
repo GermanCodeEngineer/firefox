@@ -44,6 +44,7 @@ export const PERMISSIONS_WITH_MESSAGE = new Set([
   "geolocation",
   "history",
   "management",
+  "managementRestrictions",
   "nativeMessaging",
   "notifications",
   "pkcs11",

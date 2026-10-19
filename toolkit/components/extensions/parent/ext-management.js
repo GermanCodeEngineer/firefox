@@ -26,6 +26,9 @@ XPCOMUtils.defineLazyServiceGetter(
 
 var { ExtensionError } = ExtensionUtils;
 
+const ADMIN_MODE_REQUEST_TOPIC = "webextension-admin-mode-request";
+const ADMIN_MODE_RESPONSE_TOPIC = "webextension-admin-mode-response";
+
 const _ = (key, ...args) => {
   if (args.length) {
     return strBundle.formatStringFromName(key, args);
@@ -196,6 +199,25 @@ this.management = class extends ExtensionAPIPersistent {
   }
 
   PERSISTENT_EVENTS = {
+    onAdminModeRequest({ fire }) {
+      let { extension } = this;
+      let observer = subject => {
+        let { extensionId, requestId } = subject.wrappedJSObject;
+        if (extensionId == extension.id) {
+          fire.async({ requestId });
+        }
+      };
+
+      Services.obs.addObserver(observer, ADMIN_MODE_REQUEST_TOPIC);
+      return {
+        unregister() {
+          Services.obs.removeObserver(observer, ADMIN_MODE_REQUEST_TOPIC);
+        },
+        convert(_fire) {
+          fire = _fire;
+        },
+      };
+    },
     onDisabled: this.eventRegistrar("onDisabled"),
     onEnabled: this.eventRegistrar("onEnabled"),
     onInstalled: this.eventRegistrar("onInstalled"),
@@ -207,6 +229,19 @@ this.management = class extends ExtensionAPIPersistent {
 
     return {
       management: {
+        respondToAdminModeRequest(requestId, allow) {
+          Services.obs.notifyObservers(
+            {
+              wrappedJSObject: {
+                extensionId: extension.id,
+                requestId,
+                allow,
+              },
+            },
+            ADMIN_MODE_RESPONSE_TOPIC
+          );
+        },
+
         async get(id) {
           let addon = await AddonManager.getAddonByID(id);
           if (!addon) {
@@ -333,6 +368,13 @@ this.management = class extends ExtensionAPIPersistent {
             await addon.disable();
           }
         },
+
+        onAdminModeRequest: new EventManager({
+          context,
+          module: "management",
+          event: "onAdminModeRequest",
+          extensionApi: this,
+        }).api(),
 
         onDisabled: new EventManager({
           context,

@@ -308,9 +308,45 @@
             "parameters": []
           }
         ]
+      },
+      {
+        "name": "respondToAdminModeRequest",
+        "type": "function",
+        "permissions": ["managementRestrictions"],
+        "description": "Responds to a browser request to enable Admin Mode.",
+        "parameters": [
+          {
+            "name": "requestId",
+            "type": "string",
+            "description": "Identifier of the pending Admin Mode request."
+          },
+          {
+            "name": "allow",
+            "type": "boolean",
+            "description": "Whether Admin Mode should be enabled."
+          }
+        ]
       }
     ],
     "events": [
+      {
+        "name": "onAdminModeRequest",
+        "type": "function",
+        "permissions": ["managementRestrictions"],
+        "description": "Fired when the user asks to enable Admin Mode.",
+        "parameters": [
+          {
+            "name": "request",
+            "type": "object",
+            "properties": {
+              "requestId": {
+                "type": "string",
+                "description": "Identifier to use when responding to this request."
+              }
+            }
+          }
+        ]
+      },
       {
         "name": "onDisabled",
         "type": "function",

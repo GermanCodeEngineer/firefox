@@ -20,6 +20,7 @@ webext-perms-description-find = Read the text of all open tabs
 webext-perms-description-geolocation = Access your location
 webext-perms-description-history = Access browsing history
 webext-perms-description-management = Monitor extension usage and manage themes
+webext-perms-description-managementRestrictions = Restrict access to managing installed extensions when Admin Mode is off
 webext-perms-description-nativeMessaging = Exchange messages with programs other than { -brand-short-name }
 webext-perms-description-notifications = Display notifications to you
 webext-perms-description-pkcs11 = Provide cryptographic authentication services

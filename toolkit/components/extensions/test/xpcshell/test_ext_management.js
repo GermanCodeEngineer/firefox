@@ -134,6 +134,51 @@ add_task(async function test_management_permission() {
   await extension.unload();
 });
 
+add_task(async function test_admin_mode_request_api() {
+  let extension = ExtensionTestUtils.loadExtension({
+    manifest: {
+      permissions: ["managementRestrictions"],
+    },
+    background() {
+      browser.management.onAdminModeRequest.addListener(({ requestId }) => {
+        browser.test.sendMessage("admin-mode-request", requestId);
+        browser.management.respondToAdminModeRequest(
+          requestId,
+          requestId == "allow-request"
+        );
+      });
+    },
+  });
+
+  await extension.startup();
+
+  for (const [requestId, expectedAllow] of [
+    ["allow-request", true],
+    ["deny-request", false],
+  ]) {
+    const response = TestUtils.topicObserved(
+      "webextension-admin-mode-response",
+      subject => subject.wrappedJSObject.requestId == requestId
+    );
+    Services.obs.notifyObservers(
+      {
+        wrappedJSObject: {
+          extensionId: extension.id,
+          requestId,
+        },
+      },
+      "webextension-admin-mode-request"
+    );
+
+    equal(await extension.awaitMessage("admin-mode-request"), requestId);
+    const [subject] = await response;
+    equal(subject.wrappedJSObject.extensionId, extension.id);
+    equal(subject.wrappedJSObject.allow, expectedAllow);
+  }
+
+  await extension.unload();
+});
+
 add_task(async function test_management_getAll() {
   const id1 = "get_all_test1@tests.mozilla.com";
   const id2 = "get_all_test2@tests.mozilla.com";

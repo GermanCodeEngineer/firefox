@@ -589,7 +589,11 @@
         "id": "Permission",
         "choices": [
           { "$ref": "PermissionNoPrompt" },
-          { "$ref": "OptionalPermission" }
+          { "$ref": "OptionalPermission" },
+          {
+            "type": "string",
+            "enum": ["managementRestrictions"]
+          }
         ]
       },
       {
