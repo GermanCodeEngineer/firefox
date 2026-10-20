@@ -478,13 +478,13 @@ function observe(subject, topic) {
   } else if (topic == "content-page-shown" || topic == "chrome-page-shown") {
     // The observer service notification doesn't receive the "persisted" DOM Event attribute,
     // but thanksfully is fired just before the dispatching of that DOM event.
-    subject.defaultView.addEventListener("pageshow", handleEvent, {
+    subject.defaultView?.addEventListener("pageshow", handleEvent, {
       capture: true,
       once: true,
     });
   } else if (topic == "content-page-hidden" || topic == "chrome-page-hidden") {
     // Same as previous elseif branch
-    subject.defaultView.addEventListener("pagehide", handleEvent, {
+    subject.defaultView?.addEventListener("pagehide", handleEvent, {
       capture: true,
       once: true,
     });

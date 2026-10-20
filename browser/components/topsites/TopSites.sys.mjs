@@ -1250,7 +1250,7 @@ export class FaviconProvider {
    *
    * @param {nsIURI} faviconURI
    *        nsIURI for the favicon.
-   * @returns {nsIURI} data URL
+   * @returns {nsIURI|null} data URL, or null if the request failed.
    */
   async getFaviconDataURLFromNetwork(faviconURI) {
     let channel = lazy.NetUtil.newChannel({
@@ -1267,7 +1267,7 @@ export class FaviconProvider {
 
     lazy.NetUtil.asyncFetch(channel, async (input, status, request) => {
       if (!Components.isSuccessCode(status)) {
-        resolver.resolve();
+        resolver.resolve(null);
         return;
       }
 
@@ -1324,14 +1324,13 @@ export class FaviconProvider {
       }
 
       // Otherwise, fetch from network.
+      const dataURL = await this.getFaviconDataURLFromNetwork(faviconURI);
+      if (!dataURL) {
+        return;
+      }
+
       lazy.PlacesUtils.favicons
-        .setFaviconForPage(
-          pageURI,
-          faviconURI,
-          await this.getFaviconDataURLFromNetwork(faviconURI),
-          0,
-          /* isRich */ true
-        )
+        .setFaviconForPage(pageURI, faviconURI, dataURL, 0, /* isRich */ true)
         .catch(console.error);
     } catch (ex) {
       console.error(`Failed to set favicon for page:${ex}`);
