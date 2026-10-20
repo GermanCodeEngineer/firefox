@@ -1,4 +1,13 @@
-console.log("Running background.js with ")
+document.body.style.border = "5px solid red";
+
+function print() {
+  console.log("Running background.js with ");
+  setTimeout(print, 500);
+}
+
+print();
+
+/*
 browser.management.onAdminModeRequest.addListener(async ({ requestId }) => {
   try {
     const { password, authorizedUntil = 0 } = await browser.storage.local.get([
@@ -17,3 +26,5 @@ browser.management.onAdminModeRequest.addListener(async ({ requestId }) => {
     browser.management.respondToAdminModeRequest(requestId, false);
   }
 });
+*/
+

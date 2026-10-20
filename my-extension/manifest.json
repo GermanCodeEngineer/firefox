@@ -1,16 +1,20 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Password Protected Add-on Manager",
   "version": "1.0",
   "description": "Requires a password to enable Admin Mode in the add-on manager.",
-  "permissions": [
-    "managementRestrictions",
-    "storage"
-  ],
-  "background": {
-    "scripts": ["background.js"]
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "addon-manager-germancodeengineer@proton.me",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
   },
-  "browser_action": {
-    "default_popup": "popup.html"
-  }
+  "content_scripts": [
+    {
+      "matches": ["*://*.mozilla.org/*", "https://google.com"],
+      "js": ["borderify.js"]
+    }
+  ]
 }
