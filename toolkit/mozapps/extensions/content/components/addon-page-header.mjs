@@ -148,7 +148,11 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
     this.totpDialog.addEventListener("close", this);
     this.totpDialog.addEventListener("cancel", this);
     this.adminModeObserver = {
-      observe: () => this.updateAdminModeToggle(),
+      observe: () => {
+        console.warn("[Admin Mode TOTP] header-admin-mode-observer-start");
+        this.updateAdminModeToggle();
+        console.warn("[Admin Mode TOTP] header-admin-mode-observer-finished");
+      },
     };
     Services.obs.addObserver(
       this.adminModeObserver,
@@ -248,6 +252,8 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
       }
       if (e.target.closest(".admin-mode-totp-confirm")) {
         await this.confirmTotpSetup();
+        console.warn("[Admin Mode TOTP] verify-event-handler-resumed");
+        console.warn("[Admin Mode TOTP] verify-event-handler-return");
         return;
       }
       switch (e.target) {
@@ -328,6 +334,16 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
       ManagementRestrictions.recordTotpMemoryCheckpoint("verify-finished");
       this.totpSubmitting = false;
       this.totpConfirmButton.disabled = false;
+      console.warn("[Admin Mode TOTP] verify-ui-reset-complete");
+      for (const delay of [1000, 5000, 15000]) {
+        console.warn(`[Admin Mode TOTP] scheduling-post-verify-${delay}ms`);
+        setTimeout(() => {
+          console.warn(`[Admin Mode TOTP] post-verify-${delay}ms-fired`);
+          ManagementRestrictions.recordTotpMemoryCheckpoint(
+            `verify-finished-plus-${delay}ms`
+          );
+        }, delay);
+      }
     }
   }
 }

@@ -40,6 +40,9 @@ const ADMIN_MODE_RESTRICTED_ACTIONS = new Set([
   "never-activate",
 ]);
 
+let adminModeControlUpdateCount = 0;
+let adminModeMutationCallbackCount = 0;
+
 function updateAdminModeControls(root = document) {
   const enabled = lazy.ManagementRestrictions.isAdminModeEnabled();
   document.body.toggleAttribute("admin-mode-disabled", !enabled);

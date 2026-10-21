@@ -232,13 +232,18 @@ async function findActiveControllerId() {
 }
 
 function setAdminModeEnabled(enabled, controllerId = "") {
+  console.warn(
+    `[Admin Mode TOTP] admin-mode-pref-write-start; enabled=${enabled}`
+  );
   Services.prefs.setBoolPref(ADMIN_MODE_PREF, enabled);
   if (controllerId) {
     Services.prefs.setStringPref(CONTROLLER_ID_PREF, controllerId);
   } else if (enabled || isTotpConfigured()) {
     Services.prefs.clearUserPref(CONTROLLER_ID_PREF);
   }
+  console.warn("[Admin Mode TOTP] admin-mode-notification-start");
   Services.obs.notifyObservers(null, ADMIN_MODE_CHANGED_TOPIC, String(enabled));
+  console.warn("[Admin Mode TOTP] admin-mode-notification-finished");
 }
 
 function registerAddonListener() {
