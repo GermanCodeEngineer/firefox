@@ -50,6 +50,7 @@ fun AddonPermissionsScreen(
     requiredDataCollectionPermissions: List<String> = emptyList(),
     hasNoneDataCollection: Boolean = false,
     optionalDataCollectionPermissions: List<Addon.LocalizedPermission> = emptyList(),
+    adminModeEnabled: Boolean = true,
 ) {
     Surface {
         val hasNoPermission =
@@ -113,8 +114,9 @@ fun AddonPermissionsScreen(
                     item {
                         AllSitesToggle(
                             enabledAllowForAll = isAllSitesEnabled,
-                            onAddAllSitesPermissions,
-                            onRemoveAllSitesPermissions,
+                            isEnabled = adminModeEnabled,
+                            onAddAllSitesPermissions = onAddAllSitesPermissions,
+                            onRemoveAllSitesPermissions = onRemoveAllSitesPermissions,
                         )
                     }
                 }
@@ -133,6 +135,7 @@ fun AddonPermissionsScreen(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                             localizedPermission = optionalPermission,
                             type = OptionalPermissionType.PERMISSION,
+                            isEnabled = adminModeEnabled,
                             addOptionalPermission = onAddOptionalPermissions,
                             removeOptionalPermission = onRemoveOptionalPermissions,
                         )
@@ -153,7 +156,7 @@ fun AddonPermissionsScreen(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                             localizedPermission = originPermission,
                             type = OptionalPermissionType.ORIGIN,
-                            isEnabled = !isAllSitesEnabled,
+                            isEnabled = adminModeEnabled && !isAllSitesEnabled,
                             addOptionalPermission = onAddOptionalPermissions,
                             removeOptionalPermission = onRemoveOptionalPermissions,
                         )
@@ -200,6 +203,7 @@ fun AddonPermissionsScreen(
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                         localizedPermission = optionalPermission,
                         type = OptionalPermissionType.DATA_COLLECTION,
+                        isEnabled = adminModeEnabled,
                         addOptionalPermission = onAddOptionalPermissions,
                         removeOptionalPermission = onRemoveOptionalPermissions,
                     )
@@ -244,6 +248,7 @@ private fun DataCollectionPermission(
 @Composable
 private fun AllSitesToggle(
     enabledAllowForAll: Boolean,
+    isEnabled: Boolean,
     onAddAllSitesPermissions: () -> Unit,
     onRemoveAllSitesPermissions: () -> Unit,
 ) {
@@ -255,6 +260,7 @@ private fun AllSitesToggle(
         description = stringResource(R.string.addons_permissions_allow_for_all_sites_subtitle),
         maxDescriptionLines = Int.MAX_VALUE,
         showSwitchAfter = true,
+        enabled = isEnabled,
     ) { enabled ->
         if (enabled) {
             onAddAllSitesPermissions()

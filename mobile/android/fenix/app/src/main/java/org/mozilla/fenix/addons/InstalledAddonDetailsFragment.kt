@@ -21,6 +21,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import mozilla.components.browser.engine.gecko.await
 import mozilla.components.concept.base.crash.Breadcrumb
 import mozilla.components.concept.engine.webextension.EnableSource
 import mozilla.components.feature.addons.Addon
@@ -38,10 +39,14 @@ import org.mozilla.fenix.e2e.SystemInsetsPaddedFragment
 import org.mozilla.fenix.ext.components
 import org.mozilla.fenix.ext.runIfFragmentIsAttached
 import org.mozilla.fenix.ext.showToolbar
+import org.mozilla.geckoview.AdminModeController
+import org.mozilla.geckoview.ExperimentalGeckoViewApi
 
 /** An activity to show the details of a installed add-on. */
 @Suppress("LargeClass", "TooManyFunctions")
+@androidx.annotation.OptIn(ExperimentalGeckoViewApi::class)
 class InstalledAddonDetailsFragment : Fragment(), SystemInsetsPaddedFragment {
+    private var adminModeEnabled = false
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE) internal lateinit var addon: Addon
     internal val logger = Logger("InstalledAddonDetailsFragment")
 
@@ -82,6 +87,14 @@ class InstalledAddonDetailsFragment : Fragment(), SystemInsetsPaddedFragment {
         super.onResume()
         context?.let {
             showToolbar(title = addon.translateName(it))
+        }
+        lifecycleScope.launch {
+            adminModeEnabled = runCatching {
+                AdminModeController.getState().await()?.getBoolean("enabled") == true
+            }.getOrDefault(false)
+            if (_binding != null) {
+                applyAdminModeRestrictions()
+            }
         }
     }
 
@@ -156,6 +169,7 @@ class InstalledAddonDetailsFragment : Fragment(), SystemInsetsPaddedFragment {
         bindPermissions()
         bindAllowInPrivateBrowsingSwitch()
         bindRemoveButton()
+        applyAdminModeRestrictions()
         bindReportButton()
         context?.let {
             val messageBarWarningView = binding.root.findViewById<View>(addonsR.id.add_on_messagebar_warning)
@@ -207,6 +221,11 @@ class InstalledAddonDetailsFragment : Fragment(), SystemInsetsPaddedFragment {
         privateBrowsingSwitch: MaterialSwitch,
         isChecked: Boolean,
     ) {
+        if (!adminModeEnabled) {
+            switch.setCheckedSilently(addon.isEnabled())
+            showAdminModeRequiredMessage()
+            return
+        }
         val addonManager = provideAddonManager()
         switch.isClickable = false
         // Re-enabled from onToggleSuccess/onToggleError once the operation completes.
@@ -328,6 +347,7 @@ class InstalledAddonDetailsFragment : Fragment(), SystemInsetsPaddedFragment {
     internal fun bindAllowInPrivateBrowsingSwitch() {
         val switch = providePrivateBrowsingSwitch()
         switch.isVisible = addon.isEnabled()
+        switch.isEnabled = adminModeEnabled
 
         if (addon.incognito == Addon.Incognito.NOT_ALLOWED) {
             switch.isChecked = false
@@ -340,6 +360,11 @@ class InstalledAddonDetailsFragment : Fragment(), SystemInsetsPaddedFragment {
         switch.isChecked = addon.isAllowedInPrivateBrowsing()
 
         switch.setOnCheckedChangeListener { v, isChecked ->
+            if (!adminModeEnabled) {
+                switch.setCheckedSilently(addon.isAllowedInPrivateBrowsing())
+                showAdminModeRequiredMessage()
+                return@setOnCheckedChangeListener
+            }
             val addonManager = v.context.components.addonManager
             switch.isClickable = false
             disableButtons()
@@ -383,6 +408,10 @@ class InstalledAddonDetailsFragment : Fragment(), SystemInsetsPaddedFragment {
         binding.settings.apply {
             isVisible = shouldSettingsBeVisible()
             setOnClickListener { v ->
+                if (!adminModeEnabled) {
+                    showAdminModeRequiredMessage()
+                    return@setOnClickListener
+                }
                 val settingUrl = addon.installedState?.optionsPageUrl ?: return@setOnClickListener
                 val directions =
                     if (addon.installedState?.openOptionsPageInTab == true) {
@@ -420,6 +449,10 @@ class InstalledAddonDetailsFragment : Fragment(), SystemInsetsPaddedFragment {
 
     private fun bindPermissions() {
         binding.permissions.setOnClickListener {
+            if (!adminModeEnabled) {
+                showAdminModeRequiredMessage()
+                return@setOnClickListener
+            }
             val directions =
                 InstalledAddonDetailsFragmentDirections.actionInstalledAddonFragmentToAddonPermissionsDetailsFragment(
                     addon
@@ -431,6 +464,10 @@ class InstalledAddonDetailsFragment : Fragment(), SystemInsetsPaddedFragment {
     @VisibleForTesting
     internal fun bindRemoveButton() {
         binding.removeAddOn.setOnClickListener {
+            if (!adminModeEnabled) {
+                showAdminModeRequiredMessage()
+                return@setOnClickListener
+            }
             fun uninstall() {
                 setAllInteractiveViewsClickable(binding, false)
                 provideAddonManager()
@@ -477,7 +514,7 @@ class InstalledAddonDetailsFragment : Fragment(), SystemInsetsPaddedFragment {
     }
 
     private fun enableButtons() {
-        binding.removeAddOn.isEnabled = true
+        binding.removeAddOn.isEnabled = adminModeEnabled
         binding.reportAddOn.isEnabled = true
     }
 
@@ -487,4 +524,23 @@ class InstalledAddonDetailsFragment : Fragment(), SystemInsetsPaddedFragment {
     }
 
     private fun shouldSettingsBeVisible() = !addon.installedState?.optionsPageUrl.isNullOrEmpty()
+
+    private fun applyAdminModeRestrictions() {
+        val safeBinding = _binding ?: return
+        safeBinding.enableSwitch.isEnabled = adminModeEnabled &&
+            !addon.isDisabledAsBlocklisted() &&
+            !addon.isDisabledAsNotCorrectlySigned() &&
+            !addon.isDisabledAsIncompatible()
+        safeBinding.allowInPrivateBrowsingSwitch.isEnabled =
+            adminModeEnabled && addon.incognito != Addon.Incognito.NOT_ALLOWED
+        safeBinding.settings.isEnabled = adminModeEnabled
+        safeBinding.permissions.isEnabled = adminModeEnabled
+        safeBinding.removeAddOn.isEnabled = adminModeEnabled
+    }
+
+    private fun showAdminModeRequiredMessage() {
+        _binding?.root?.let {
+            showSnackBar(it, getString(org.mozilla.fenix.R.string.admin_mode_authentication_required))
+        }
+    }
 }

@@ -31,6 +31,9 @@ interface AddonsManagerAdapterDelegate {
      */
     fun onInstallAddonButtonClicked(addon: Addon) = Unit
 
+    /** Determines whether install buttons should be enabled. */
+    fun isInstallButtonEnabled(): Boolean = true
+
     /**
      * Handler for when the not yet supported section is clicked.
      *

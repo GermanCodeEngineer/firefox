@@ -9,11 +9,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.fragment.app.Fragment
 import androidx.fragment.compose.content
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import mozilla.components.browser.engine.gecko.await
 import mozilla.components.feature.addons.Addon
 import mozilla.components.feature.addons.Addon.Companion.isAllURLsPermission
 import mozilla.components.feature.addons.ui.translateName
@@ -25,6 +27,8 @@ import org.mozilla.fenix.ext.requireComponents
 import org.mozilla.fenix.ext.showToolbar
 import org.mozilla.fenix.settings.SupportUtils
 import org.mozilla.fenix.theme.FirefoxTheme
+import org.mozilla.geckoview.AdminModeController
+import org.mozilla.geckoview.ExperimentalGeckoViewApi
 
 /** Optional [Addon.Permission.name] lists for requesting permission updates for an [Addon]. */
 data class AddonPermissionsUpdateRequest(
@@ -34,6 +38,7 @@ data class AddonPermissionsUpdateRequest(
 )
 
 /** A fragment to show and allow a user to change permissions for an addon. */
+@androidx.annotation.OptIn(ExperimentalGeckoViewApi::class)
 class AddonPermissionsDetailsFragment : Fragment(), SystemInsetsPaddedFragment {
 
     private val args by navArgs<AddonPermissionsDetailsFragmentArgs>()
@@ -43,6 +48,11 @@ class AddonPermissionsDetailsFragment : Fragment(), SystemInsetsPaddedFragment {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ) = content {
+        val adminModeEnabled = produceState(initialValue = false) {
+            value = runCatching {
+                AdminModeController.getState().await()?.getBoolean("enabled") == true
+            }.getOrDefault(false)
+        }.value
         val optionalPermissions = rememberSaveable {
             mutableStateOf(args.addon.translateOptionalPermissions(requireContext()))
         }
@@ -88,29 +98,38 @@ class AddonPermissionsDetailsFragment : Fragment(), SystemInsetsPaddedFragment {
                     args.addon.requiredDataCollectionPermissions.size == 1 &&
                         args.addon.requiredDataCollectionPermissions.contains("none"),
                 optionalDataCollectionPermissions = optionalDataCollectionPermissions.value,
+                adminModeEnabled = adminModeEnabled,
                 isAllSitesSwitchVisible = allSitesHostPermissionsList.value.isNotEmpty(),
                 isAllSitesEnabled = allSitesHostPermissionsList.value.getOrNull(0)?.granted ?: false,
                 onAddOptionalPermissions = { permissionRequest ->
-                    addOptionalPermissions(permissionRequest, onUpdatePermissionsSuccess)
+                    if (adminModeEnabled) {
+                        addOptionalPermissions(permissionRequest, onUpdatePermissionsSuccess)
+                    }
                 },
                 onRemoveOptionalPermissions = { permissionRequest ->
-                    removeOptionalPermission(permissionRequest, onUpdatePermissionsSuccess)
+                    if (adminModeEnabled) {
+                        removeOptionalPermission(permissionRequest, onUpdatePermissionsSuccess)
+                    }
                 },
                 onAddAllSitesPermissions = {
-                    addOptionalPermissions(
-                        AddonPermissionsUpdateRequest(
-                            originPermissions = allSitesHostPermissionsList.value.map { it.name }
-                        ),
-                        onUpdatePermissionsSuccess,
-                    )
+                    if (adminModeEnabled) {
+                        addOptionalPermissions(
+                            AddonPermissionsUpdateRequest(
+                                originPermissions = allSitesHostPermissionsList.value.map { it.name }
+                            ),
+                            onUpdatePermissionsSuccess,
+                        )
+                    }
                 },
                 onRemoveAllSitesPermissions = {
-                    removeOptionalPermission(
-                        AddonPermissionsUpdateRequest(
-                            originPermissions = allSitesHostPermissionsList.value.map { it.name }
-                        ),
-                        onUpdatePermissionsSuccess,
-                    )
+                    if (adminModeEnabled) {
+                        removeOptionalPermission(
+                            AddonPermissionsUpdateRequest(
+                                originPermissions = allSitesHostPermissionsList.value.map { it.name }
+                            ),
+                            onUpdatePermissionsSuccess,
+                        )
+                    }
                 },
                 onLearnMoreClick = { learnMoreUrl ->
                     openWebsite(learnMoreUrl)

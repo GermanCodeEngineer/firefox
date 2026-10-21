@@ -84,6 +84,7 @@ import java.util.Map;
 import org.json.JSONObject;
 import org.mozilla.gecko.util.GeckoBundle;
 import org.mozilla.geckoview.AIFeaturesController;
+import org.mozilla.geckoview.AdminModeController;
 import org.mozilla.geckoview.AllowOrDeny;
 import org.mozilla.geckoview.Autocomplete;
 import org.mozilla.geckoview.Autofill;
@@ -165,6 +166,14 @@ package org.mozilla.geckoview {
     method @HandlerThread @NonNull public static GeckoResult<Map<String,AIFeaturesController.AIFeature>> listFeatures();
     method @HandlerThread @NonNull public static GeckoResult<Void> makeFeatureAvailable(@NonNull String);
     method @HandlerThread @NonNull public static GeckoResult<Void> setFeatureEnablement(@NonNull String, boolean);
+  }
+
+  @org.mozilla.geckoview.ExperimentalGeckoViewApi public class AdminModeController {
+    method @AnyThread @NonNull public static GeckoResult<GeckoBundle> beginTotpSetup();
+    method @AnyThread @NonNull public static GeckoResult<Boolean> completeTotpSetup(@NonNull String, @NonNull String, @NonNull String);
+    method @AnyThread @NonNull public static GeckoResult<GeckoBundle> getState();
+    method @AnyThread @NonNull public static GeckoResult<Boolean> recover(@NonNull String, boolean);
+    method @AnyThread @NonNull public static GeckoResult<Boolean> setEnabled(boolean, @NonNull String);
   }
 
   @AnyThread public final enum AllowOrDeny {

@@ -16,6 +16,7 @@ class AddonsManagementView(
     private val onInstallButtonClicked: (Addon) -> Unit,
     private val onMoreAddonsButtonClicked: () -> Unit,
     private val onLearnMoreClicked: (link: AddonsManagerAdapterDelegate.LearnMoreLinks, addon: Addon) -> Unit,
+    private val isInstallEnabled: () -> Boolean = { true },
 ) : AddonsManagerAdapterDelegate {
 
     override fun onAddonItemClicked(addon: Addon) {
@@ -29,6 +30,8 @@ class AddonsManagementView(
     override fun onInstallAddonButtonClicked(addon: Addon) {
         onInstallButtonClicked(addon)
     }
+
+    override fun isInstallButtonEnabled(): Boolean = isInstallEnabled()
 
     override fun onNotYetSupportedSectionClicked(unsupportedAddons: List<Addon>) {
         showNotYetSupportedAddonFragment(unsupportedAddons)

@@ -332,6 +332,7 @@ class AddonsManagerAdapter(
                 R.string.mozac_feature_addons_install_addon_content_description_2,
                 addonName,
             )
+        holder.addButton.isEnabled = addonsManagerDelegate.isInstallButtonEnabled()
         holder.addButton.setOnClickListener {
             if (!addon.isInstalled()) {
                 addonsManagerDelegate.onInstallAddonButtonClicked(addon)

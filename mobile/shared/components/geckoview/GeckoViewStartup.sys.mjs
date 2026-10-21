@@ -309,6 +309,18 @@ export class GeckoViewStartup {
           ],
         });
 
+        GeckoViewUtils.addLazyGetter(this, "GeckoViewManagementRestrictions", {
+          module:
+            "resource://gre/modules/GeckoViewManagementRestrictions.sys.mjs",
+          ged: [
+            "GeckoView:ManagementRestrictions:GetState",
+            "GeckoView:ManagementRestrictions:SetEnabled",
+            "GeckoView:ManagementRestrictions:BeginTotpSetup",
+            "GeckoView:ManagementRestrictions:CompleteTotpSetup",
+            "GeckoView:ManagementRestrictions:Recover",
+          ],
+        });
+
         GeckoViewUtils.addLazyGetter(this, "GeckoViewTranslationsSettings", {
           module: "resource://gre/modules/GeckoViewTranslations.sys.mjs",
           ged: [

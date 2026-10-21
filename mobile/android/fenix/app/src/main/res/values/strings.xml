@@ -286,6 +286,19 @@
     <!-- Extensions management fragment -->
     <!-- Text displayed when there are no extensions to be shown -->
     <string name="extensions_management_no_extensions">No extensions here</string>
+    <string name="admin_mode_title">Admin Mode</string>
+    <string name="admin_mode_description">Turn on to install, remove, or change extensions.</string>
+    <string name="admin_mode_authenticator_setup">Set up authenticator</string>
+    <string name="admin_mode_emergency_recovery">Emergency recovery</string>
+    <string name="admin_mode_enter_code">Enter your authenticator code</string>
+    <string name="admin_mode_setup_title">Set up authenticator protection</string>
+    <string name="admin_mode_setup_instructions">Scan this QR code with an authenticator app, save the recovery code, then enter the six-digit code from the app.</string>
+    <string name="admin_mode_recovery_code_label">Recovery code: %1$s</string>
+    <string name="admin_mode_recovery_warning">Use this only if authenticator access has failed. Recovery disables authenticator protection.</string>
+    <string name="admin_mode_recovery_promise">I promise this recovery is necessary and I am not abusing it.</string>
+    <string name="admin_mode_authentication_failed">The code was not accepted.</string>
+    <string name="admin_mode_authentication_required">Admin Mode is off. Turn it on in Add-ons Manager to change extensions.</string>
+    <string name="admin_mode_setup_success">Authenticator is set up. Use a code to turn Admin Mode on.</string>
 
     <!-- Browser Toolbar -->
     <!-- Content description for the translate page toolbar button that opens the translations dialog when no translation has occurred. -->

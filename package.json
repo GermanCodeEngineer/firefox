@@ -54,7 +54,7 @@
     "android-install-build": "npm run android-build && npm run android-build-apk && ./mach android install-fenix",
     "android-install-apk": "adb install -r objdir-frontend/gradle/build/mobile/android/fenix/app/outputs/apk/debug/fenix-arm64-v8a-debug.apk",
     "android-check-abi": "unzip -l objdir-frontend/gradle/build/mobile/android/fenix/app/outputs/apk/debug/fenix-arm64-v8a-debug.apk | grep 'lib/arm64-v8a/libxul.so'",
-    "android-build-install": "npm run android-build && npm run android-build-apk && npm run android-check-abi && npm run android-install-apk",
+    "android-build-install": "MOZCONFIG=objdir-frontend/.mozconfig npm run android-build && MOZCONFIG=objdir-frontend/.mozconfig npm run android-build-apk && npm run android-check-abi && npm run android-install-apk",
     "mach-gradle": "./mach gradle --no-configuration-cache --max-workers=2 -Dorg.gradle.parallel=false fenix:assembleDebug"
   },
   "notes(private)": "We don't want to publish to npm, so this is marked as private",
