@@ -152,6 +152,54 @@ search-addons {
   margin-inline-end: var(--space-medium);
 }
 
+.admin-mode-totp-dialog {
+  width: min(32em, calc(100vw - 48px));
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-medium);
+  color: var(--text-color);
+  background: var(--background-color-canvas);
+}
+
+.admin-mode-totp-dialog::backdrop {
+  background: rgb(0 0 0 / 40%);
+}
+
+.admin-mode-totp-dialog h2 {
+  margin-block-start: 0;
+}
+
+.admin-mode-totp-qr {
+  display: block;
+  width: 220px;
+  height: 220px;
+  margin: 16px auto;
+}
+
+.admin-mode-totp-secret,
+.admin-mode-totp-recovery-code {
+  display: block;
+  overflow-wrap: anywhere;
+  margin-block: 12px;
+  user-select: all;
+}
+
+.admin-mode-totp-code {
+  display: block;
+  width: 100%;
+  margin-block-start: 4px;
+}
+
+.admin-mode-totp-error {
+  color: var(--text-color-error);
+}
+
+.admin-mode-totp-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-small);
+  margin-block-start: 16px;
+}
+
 #updates-message {
   display: flex;
   align-items: center;
