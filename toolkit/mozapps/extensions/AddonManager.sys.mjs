@@ -525,6 +525,7 @@ AddonScreenshot.prototype = {
 
 var gStarted = false;
 var gStartedPromise = Promise.withResolvers();
+const adminModeRestrictedInstalls = new WeakSet();
 var gStartupComplete = false;
 var gCheckCompatibility = true;
 var gStrictCompatibility = true;
@@ -2502,6 +2503,18 @@ var AddonManagerInternal = {
     // main tab's browser).
     let topBrowser = aBrowser.browsingContext.top.embedderElement;
     try {
+      if (!AddonManagerPrivate.isAdminModeEnabled()) {
+        aInstall.cancel();
+        this.installNotifyObservers(
+          "addon-install-admin-mode-blocked",
+          topBrowser,
+          aInstallingPrincipal.URI,
+          aInstall
+        );
+        return;
+      }
+      AddonManagerPrivate.requireAdminModeForInstall(aInstall);
+
       // Use fullscreenElement to check for DOM fullscreen, while still allowing
       // macOS fullscreen, which still has a browser chrome.
       if (topBrowser.ownerDocument.fullscreenElement) {
@@ -2650,6 +2663,18 @@ var AddonManagerInternal = {
    *         when there is an existing add-on for the `install` object.
    */
   installAddonFromAOM(browser, uri, install, options = {}) {
+    if (!AddonManagerPrivate.isAdminModeEnabled()) {
+      install.cancel();
+      this.installNotifyObservers(
+        "addon-install-admin-mode-blocked",
+        browser,
+        install.sourceURI,
+        install
+      );
+      return;
+    }
+    AddonManagerPrivate.requireAdminModeForInstall(install);
+
     if (!this.isInstallAllowedByPolicy(null, install)) {
       install.cancel();
 
@@ -3790,6 +3815,21 @@ var AddonManagerInternal = {
  * subject to change at any time.
  */
 export var AddonManagerPrivate = {
+  isAdminModeEnabled() {
+    return Services.prefs.getBoolPref(
+      "extensions.managementRestrictions.adminMode",
+      true
+    );
+  },
+
+  requireAdminModeForInstall(install) {
+    adminModeRestrictedInstalls.add(install);
+  },
+
+  isAdminModeRequiredForInstall(install) {
+    return adminModeRestrictedInstalls.has(install);
+  },
+
   startup() {
     AddonManagerInternal.startup();
   },

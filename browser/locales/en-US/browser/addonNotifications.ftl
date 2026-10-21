@@ -56,6 +56,7 @@ xpinstall-disabled-button =
 addon-installation-blocked-by-policy = { $addonName } ({ $addonId }) is blocked by your organization.
 # This message is shown when the installation of add-ons from a domain is blocked by enterprise policy.
 addon-install-domain-blocked-by-policy = Your organization prevented this site from asking you to install software on your computer.
+addon-install-blocked-by-admin-mode = Turn on Admin Mode in Add-ons Manager to install add-ons.
 addon-install-full-screen-blocked = Add-on installation is not allowed while in or before entering fullscreen mode.
 
 # Variables:

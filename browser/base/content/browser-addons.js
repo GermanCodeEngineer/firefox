@@ -1219,6 +1219,7 @@ var gXPInstallObserver = {
     "addon-install-origin-blocked",
     "addon-install-webapi-blocked",
     "addon-install-policy-blocked",
+    "addon-install-admin-mode-blocked",
     "addon-progress",
     "addon-webext-permissions",
     "xpinstall-disabled",
@@ -1333,11 +1334,15 @@ var gXPInstallObserver = {
       }
       case "addon-install-webapi-blocked":
       case "addon-install-policy-blocked":
+      case "addon-install-admin-mode-blocked":
       case "addon-install-origin-blocked": {
         const msgId =
-          aTopic == "addon-install-policy-blocked"
-            ? "addon-install-domain-blocked-by-policy"
-            : "xpinstall-prompt";
+          {
+            "addon-install-admin-mode-blocked":
+              "addon-install-blocked-by-admin-mode",
+            "addon-install-policy-blocked":
+              "addon-install-domain-blocked-by-policy",
+          }[aTopic] || "xpinstall-prompt";
         let messageString = await lazy.l10n.formatValue(msgId);
         if (Services.policies) {
           let extensionSettings = Services.policies.getExtensionSettings("*");

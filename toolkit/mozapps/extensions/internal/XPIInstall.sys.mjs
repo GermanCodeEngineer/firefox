@@ -1411,6 +1411,19 @@ class AddonInstall {
         this.checkForBlockers();
         break;
       case AddonManager.STATE_READY:
+        if (
+          AddonManagerPrivate.isAdminModeRequiredForInstall(this.wrapper) &&
+          !AddonManagerPrivate.isAdminModeEnabled()
+        ) {
+          this.state = AddonManager.STATE_CANCELLED;
+          this._cleanup();
+          this._callInstallListeners(
+            "onInstallCancelled",
+            /* aCancelledByUser */ false
+          );
+          this.removeTemporaryFile();
+          return this._installPromise;
+        }
         this.startInstall();
         break;
       case AddonManager.STATE_POSTPONED:
@@ -5066,6 +5079,10 @@ export var XPIInstall = {
    *         location that does not allow it
    */
   async uninstallAddon(aAddon, aForcePending) {
+    if (!AddonManagerPrivate.isAdminModeEnabled()) {
+      throw new Error("Cannot uninstall add-ons while Admin Mode is disabled");
+    }
+
     if (!aAddon.inDatabase) {
       throw new Error(
         `Cannot uninstall addon ${aAddon.id} because it is not installed`

@@ -486,6 +486,10 @@ var gBrowserInit = {
       "QuotaManager::StoragePressure"
     );
     Services.obs.addObserver(gXPInstallObserver, "addon-install-disabled");
+    Services.obs.addObserver(
+      gXPInstallObserver,
+      "addon-install-admin-mode-blocked"
+    );
     Services.obs.addObserver(gXPInstallObserver, "addon-install-started");
     Services.obs.addObserver(gXPInstallObserver, "addon-install-blocked");
     Services.obs.addObserver(
@@ -1111,6 +1115,10 @@ var gBrowserInit = {
         "QuotaManager::StoragePressure"
       );
       Services.obs.removeObserver(gXPInstallObserver, "addon-install-disabled");
+      Services.obs.removeObserver(
+        gXPInstallObserver,
+        "addon-install-admin-mode-blocked"
+      );
       Services.obs.removeObserver(gXPInstallObserver, "addon-install-started");
       Services.obs.removeObserver(gXPInstallObserver, "addon-install-blocked");
       Services.obs.removeObserver(
