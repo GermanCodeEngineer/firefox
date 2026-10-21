@@ -34,10 +34,13 @@ const ADMIN_MODE_RESTRICTED_ACTIONS = new Set([
   "install-from-file",
   "install-update",
   "install-postponed",
+  "update-check",
   "remove",
   "toggle-disabled",
   "always-activate",
   "never-activate",
+  "change-addon-setting",
+  "toggle-permission",
 ]);
 
 let adminModeControlUpdateCount = 0;
@@ -351,6 +354,7 @@ async function initialize() {
   });
   document.addEventListener("click", blockRestrictedAction, true);
   document.addEventListener("toggle", blockRestrictedAction, true);
+  document.addEventListener("change", blockRestrictedAction, true);
   window.addEventListener(
     "unload",
     () => {
@@ -361,6 +365,7 @@ async function initialize() {
       adminModeMutationObserver.disconnect();
       document.removeEventListener("click", blockRestrictedAction, true);
       document.removeEventListener("toggle", blockRestrictedAction, true);
+      document.removeEventListener("change", blockRestrictedAction, true);
     },
     { once: true }
   );

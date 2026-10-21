@@ -37,9 +37,6 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
             <h1 class="header-name"></h1>
             <div class="spacer"></div>
             <div class="admin-mode-control">
-              <span
-                data-l10n-id="addons-admin-mode-label"
-              ></span>
               <moz-toggle
                 class="admin-mode-toggle"
                 data-l10n-id="addons-admin-mode-toggle"
@@ -48,6 +45,12 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
                 class="admin-mode-totp-setup"
                 size="small"
                 data-l10n-id="addons-admin-mode-totp-setup"
+              ></moz-button>
+              <moz-button
+                class="admin-mode-totp-recover"
+                size="small"
+                data-l10n-id="addons-admin-mode-recovery-button"
+                hidden
               ></moz-button>
             </div>
             <addon-updates-message
@@ -105,6 +108,36 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
               ></moz-button>
             </div>
           </section>
+          <section class="admin-mode-totp-emergency" hidden>
+            <h2 data-l10n-id="addons-admin-mode-recovery-title"></h2>
+            <p data-l10n-id="addons-admin-mode-recovery-instructions"></p>
+            <label class="admin-mode-totp-recovery-promise">
+              <input class="admin-mode-totp-recovery-ack" type="checkbox" />
+              <span data-l10n-id="addons-admin-mode-recovery-promise"></span>
+            </label>
+            <label>
+              <span data-l10n-id="addons-admin-mode-recovery-key-label"></span>
+              <input
+                class="admin-mode-totp-recovery-key"
+                type="password"
+                autocomplete="off"
+                spellcheck="false"
+              />
+            </label>
+            <p class="admin-mode-totp-recovery-error" role="alert" hidden></p>
+            <div class="admin-mode-totp-actions">
+              <moz-button
+                class="admin-mode-totp-cancel"
+                data-l10n-id="addons-admin-mode-recovery-cancel"
+              ></moz-button>
+              <moz-button
+                class="admin-mode-totp-recovery-confirm"
+                type="primary"
+                data-l10n-id="addons-admin-mode-recovery-confirm"
+                disabled
+              ></moz-button>
+            </div>
+          </section>
         </dialog>
         <global-warnings></global-warnings>
       </template>
@@ -118,6 +151,9 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
       this.backButton = this.querySelector(".back-button");
       this.adminModeToggle = this.querySelector(".admin-mode-toggle");
       this.adminModeTotpSetup = this.querySelector(".admin-mode-totp-setup");
+      this.adminModeTotpRecover = this.querySelector(
+        ".admin-mode-totp-recover"
+      );
       this.totpDialog = this.querySelector(".admin-mode-totp-dialog");
       this.totpEnrollment = this.querySelector(".admin-mode-totp-enrollment");
       this.totpRecovery = this.querySelector(".admin-mode-totp-recovery");
@@ -126,6 +162,18 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
       this.totpCode = this.querySelector(".admin-mode-totp-code");
       this.totpError = this.querySelector(".admin-mode-totp-error");
       this.totpConfirmButton = this.querySelector(".admin-mode-totp-confirm");
+      this.totpRecoveryKey = this.querySelector(
+        ".admin-mode-totp-recovery-key"
+      );
+      this.totpRecoveryAcknowledgment = this.querySelector(
+        ".admin-mode-totp-recovery-ack"
+      );
+      this.totpRecoveryError = this.querySelector(
+        ".admin-mode-totp-recovery-error"
+      );
+      this.totpRecoveryConfirmButton = this.querySelector(
+        ".admin-mode-totp-recovery-confirm"
+      );
       this.pageOptionsMenuButton = this.querySelector(".more-options-button");
 
       // The addon-page-options element is outside of this element since this is
@@ -147,6 +195,8 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
     this.adminModeToggle.addEventListener("toggle", this);
     this.totpDialog.addEventListener("close", this);
     this.totpDialog.addEventListener("cancel", this);
+    this.totpDialog.addEventListener("input", this);
+    this.totpDialog.addEventListener("change", this);
     this.adminModeObserver = {
       observe: () => {
         console.warn("[Admin Mode TOTP] header-admin-mode-observer-start");
@@ -169,6 +219,8 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
     this.adminModeToggle.removeEventListener("toggle", this);
     this.totpDialog.removeEventListener("close", this);
     this.totpDialog.removeEventListener("cancel", this);
+    this.totpDialog.removeEventListener("input", this);
+    this.totpDialog.removeEventListener("change", this);
     Services.obs.removeObserver(
       this.adminModeObserver,
       "webextension-admin-mode-changed"
@@ -177,7 +229,9 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
 
   updateAdminModeToggle() {
     this.adminModeToggle.pressed = ManagementRestrictions.isAdminModeEnabled();
-    this.adminModeTotpSetup.hidden = ManagementRestrictions.isTotpConfigured();
+    const totpConfigured = ManagementRestrictions.isTotpConfigured();
+    this.adminModeTotpSetup.hidden = totpConfigured;
+    this.adminModeTotpRecover.hidden = !totpConfigured;
   }
 
   setViewInfo({ type, param }) {
@@ -217,6 +271,17 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
       this.totpRecovery.querySelector(
         ".admin-mode-totp-recovery-code"
       ).textContent = "";
+      this.totpRecoveryKey.value = "";
+      this.totpRecoveryAcknowledgment.checked = false;
+      this.totpRecoveryConfirmButton.disabled = true;
+      this.totpRecoveryError.hidden = true;
+      return;
+    }
+    if (
+      (e.type === "input" && e.target === this.totpRecoveryKey) ||
+      (e.type === "change" && e.target === this.totpRecoveryAcknowledgment)
+    ) {
+      this.updateRecoveryConfirmButton();
       return;
     }
     if (e.type === "toggle" && e.target === this.adminModeToggle) {
@@ -254,6 +319,14 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
         await this.confirmTotpSetup();
         console.warn("[Admin Mode TOTP] verify-event-handler-resumed");
         console.warn("[Admin Mode TOTP] verify-event-handler-return");
+        return;
+      }
+      if (e.target.closest(".admin-mode-totp-recover")) {
+        this.showEmergencyRecovery();
+        return;
+      }
+      if (e.target.closest(".admin-mode-totp-recovery-confirm")) {
+        await this.recoverAdminMode();
         return;
       }
       switch (e.target) {
@@ -294,6 +367,50 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
     this.totpRecovery.hidden = true;
     this.totpDialog.showModal();
     this.totpCode.focus();
+  }
+
+  showEmergencyRecovery() {
+    this.totpEnrollment.hidden = true;
+    this.totpRecovery.hidden = true;
+    this.querySelector(".admin-mode-totp-emergency").hidden = false;
+    this.totpRecoveryKey.value = "";
+    this.totpRecoveryAcknowledgment.checked = false;
+    this.totpRecoveryError.hidden = true;
+    this.updateRecoveryConfirmButton();
+    this.totpDialog.showModal();
+    this.totpRecoveryAcknowledgment.focus();
+  }
+
+  updateRecoveryConfirmButton() {
+    this.totpRecoveryConfirmButton.disabled =
+      !this.totpRecoveryAcknowledgment.checked ||
+      !this.totpRecoveryKey.value.trim();
+  }
+
+  async recoverAdminMode() {
+    this.totpRecoveryConfirmButton.disabled = true;
+    this.totpRecoveryError.hidden = true;
+    try {
+      const recovered = await ManagementRestrictions.recoverAdminMode(
+        this.totpRecoveryKey.value
+      );
+      if (recovered) {
+        this.updateAdminModeToggle();
+        this.totpDialog.close();
+        return;
+      }
+      this.totpRecoveryError.textContent = await document.l10n.formatValue(
+        "addons-admin-mode-recovery-invalid"
+      );
+      this.totpRecoveryError.hidden = false;
+    } catch (error) {
+      console.error("Could not recover Admin Mode", error);
+      this.totpRecoveryError.textContent = await document.l10n.formatValue(
+        "addons-admin-mode-recovery-failed"
+      );
+      this.totpRecoveryError.hidden = false;
+    }
+    this.updateRecoveryConfirmButton();
   }
 
   async confirmTotpSetup() {

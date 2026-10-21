@@ -177,6 +177,7 @@ export class AddonCard extends AboutAddonsHTMLElement {
           </div>
           <native-theme-colors-checkbox
             class="native-theme-checkbox-list"
+            action="change-addon-setting"
             hidden
           ></native-theme-colors-checkbox>
           <moz-message-bar

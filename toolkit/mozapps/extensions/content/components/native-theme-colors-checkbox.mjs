@@ -35,6 +35,7 @@ export function shouldShowNativeThemeCheckbox(addon) {
 export class NativeThemeColorsCheckbox extends MozLitElement {
   static properties = {
     checked: { state: true },
+    disabled: { type: Boolean, reflect: true },
     hidden: { type: Boolean, reflect: true },
   };
 
@@ -115,6 +116,7 @@ export class NativeThemeColorsCheckbox extends MozLitElement {
       <moz-checkbox
         data-l10n-id="aboutaddons-linux-theme-colors-checkbox-label"
         ?checked=${this.checked}
+        ?disabled=${this.disabled}
         @change=${this.#onChange}
       ></moz-checkbox>
     `;

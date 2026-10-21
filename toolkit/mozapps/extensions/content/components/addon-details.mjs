@@ -77,6 +77,7 @@ export class AddonDetails extends AboutAddonsHTMLElement {
             <div class="addon-detail-default-theme-options">
               <native-theme-colors-checkbox
                 class="native-theme-checkbox-detail"
+                action="change-addon-setting"
                 hidden
               ></native-theme-colors-checkbox>
             </div>
@@ -109,17 +110,32 @@ export class AddonDetails extends AboutAddonsHTMLElement {
                   hidden
                 ></button>
                 <label class="radio-container-with-text">
-                  <input type="radio" name="autoupdate" value="1" />
+                  <input
+                    type="radio"
+                    name="autoupdate"
+                    value="1"
+                    action="change-addon-setting"
+                  />
                   <span
                     data-l10n-id="addon-detail-updates-radio-default"
                   ></span>
                 </label>
                 <label class="radio-container-with-text">
-                  <input type="radio" name="autoupdate" value="2" />
+                  <input
+                    type="radio"
+                    name="autoupdate"
+                    value="2"
+                    action="change-addon-setting"
+                  />
                   <span data-l10n-id="addon-detail-updates-radio-on"></span>
                 </label>
                 <label class="radio-container-with-text">
-                  <input type="radio" name="autoupdate" value="0" />
+                  <input
+                    type="radio"
+                    name="autoupdate"
+                    value="0"
+                    action="change-addon-setting"
+                  />
                   <span data-l10n-id="addon-detail-updates-radio-off"></span>
                 </label>
               </div>
@@ -133,13 +149,23 @@ export class AddonDetails extends AboutAddonsHTMLElement {
               <span data-l10n-id="detail-private-browsing-label"></span>
               <div class="addon-detail-actions">
                 <label class="radio-container-with-text">
-                  <input type="radio" name="private-browsing" value="1" />
+                  <input
+                    type="radio"
+                    name="private-browsing"
+                    value="1"
+                    action="change-addon-setting"
+                  />
                   <span
                     data-l10n-id="addon-detail-private-browsing-allow"
                   ></span>
                 </label>
                 <label class="radio-container-with-text">
-                  <input type="radio" name="private-browsing" value="0" />
+                  <input
+                    type="radio"
+                    name="private-browsing"
+                    value="0"
+                    action="change-addon-setting"
+                  />
                   <span
                     data-l10n-id="addon-detail-private-browsing-disallow"
                   ></span>
@@ -211,6 +237,7 @@ export class AddonDetails extends AboutAddonsHTMLElement {
                     type="radio"
                     name="quarantined-domains-user-allowed"
                     value="1"
+                    action="change-addon-setting"
                   />
                   <span
                     data-l10n-id="addon-detail-quarantined-domains-allow"
@@ -221,6 +248,7 @@ export class AddonDetails extends AboutAddonsHTMLElement {
                     type="radio"
                     name="quarantined-domains-user-allowed"
                     value="0"
+                    action="change-addon-setting"
                   />
                   <span
                     data-l10n-id="addon-detail-quarantined-domains-disallow"

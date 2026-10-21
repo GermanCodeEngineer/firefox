@@ -201,21 +201,13 @@ async function acceptTotpCode(code) {
 
 async function authenticateTotp(code) {
   const normalizedCode = code.trim().replace(/\s/g, "");
-  if (
-    /^\d{6}$/.test(normalizedCode) &&
-    (await acceptTotpCode(normalizedCode))
-  ) {
-    return { authorized: true, recovered: false };
+  if (!/^\d{6}$/.test(normalizedCode)) {
+    return { authorized: false, recovered: false };
   }
-  const recoveryHash = getPrefString(TOTP_RECOVERY_HASH_PREF);
-  if (recoveryHash && normalizedCode) {
-    const suppliedHash = await sha256(normalizedCode.toUpperCase());
-    if (constantTimeEqual(suppliedHash, recoveryHash)) {
-      await clearTotpConfiguration();
-      return { authorized: true, recovered: true };
-    }
-  }
-  return { authorized: false, recovered: false };
+  return {
+    authorized: await acceptTotpCode(normalizedCode),
+    recovered: false,
+  };
 }
 
 function makeRecoveryCode() {
@@ -452,6 +444,20 @@ export const ManagementRestrictions = {
     recordTotpMemoryCheckpoint("totp-prefs-saved");
     setAdminModeEnabled(false);
     recordTotpMemoryCheckpoint("setup-complete");
+    return true;
+  },
+  async recoverAdminMode(recoveryCode) {
+    const normalizedCode = recoveryCode.trim().replace(/\s/g, "");
+    const recoveryHash = getPrefString(TOTP_RECOVERY_HASH_PREF);
+    if (!isTotpConfigured() || !recoveryHash || !normalizedCode) {
+      return false;
+    }
+    const suppliedHash = await sha256(normalizedCode.toUpperCase());
+    if (!constantTimeEqual(suppliedHash, recoveryHash)) {
+      return false;
+    }
+    await clearTotpConfiguration();
+    setAdminModeEnabled(true);
     return true;
   },
   recordTotpMemoryCheckpoint,

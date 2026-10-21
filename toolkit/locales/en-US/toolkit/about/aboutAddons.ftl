@@ -4,11 +4,11 @@
 
 addons-page-title = Add-ons Manager
 
-addons-admin-mode-label = Admin Mode
 addons-admin-mode-toggle =
     .label = Admin Mode
 addons-admin-mode-totp-setup = Set up authenticator
-addons-admin-mode-totp-prompt = Enter the current six-digit authenticator code, or enter your one-time recovery code to disable this protection.
+addons-admin-mode-recovery-button = Emergency recovery
+addons-admin-mode-totp-prompt = Enter the current six-digit authenticator code.
 addons-admin-mode-totp-dialog-title = Set up an authenticator
 addons-admin-mode-totp-dialog-instructions = Scan this QR code with your authenticator app, then enter the six-digit code it provides.
 addons-admin-mode-totp-qr-alt = QR code for Firefox Admin Mode authenticator setup
@@ -20,6 +20,14 @@ addons-admin-mode-totp-recovery-title = Save your recovery code
 addons-admin-mode-totp-recovery-instructions = Keep this one-time code somewhere safe. Using it unlocks Admin Mode and disables authenticator protection.
 addons-admin-mode-totp-close = Done
 addons-admin-mode-totp-setup-failed = Firefox could not save authenticator protection. Try again.
+addons-admin-mode-recovery-title = Emergency Admin Mode recovery
+addons-admin-mode-recovery-instructions = Using this one-time key enables Admin Mode and removes authenticator protection. Continue only when recovery is necessary.
+addons-admin-mode-recovery-promise = I promise this recovery is necessary and that I am not abusing it.
+addons-admin-mode-recovery-key-label = Emergency recovery key
+addons-admin-mode-recovery-cancel = Cancel
+addons-admin-mode-recovery-confirm = Restore Admin Mode
+addons-admin-mode-recovery-invalid = The recovery key is incorrect. Protection is still enabled.
+addons-admin-mode-recovery-failed = Firefox could not complete emergency recovery. Try again.
 
 search-header =
     .placeholder = Search addons.mozilla.org

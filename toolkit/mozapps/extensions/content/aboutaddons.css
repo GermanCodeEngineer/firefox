@@ -183,14 +183,22 @@ search-addons {
   user-select: all;
 }
 
-.admin-mode-totp-code {
+.admin-mode-totp-code,
+.admin-mode-totp-recovery-key {
   display: block;
   width: 100%;
   margin-block-start: 4px;
 }
 
-.admin-mode-totp-error {
+.admin-mode-totp-error,
+.admin-mode-totp-recovery-error {
   color: var(--text-color-error);
+}
+
+.admin-mode-totp-recovery-promise {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-small);
 }
 
 .admin-mode-totp-actions {
