@@ -35,6 +35,24 @@ function getPrefString(name) {
   return Services.prefs.getStringPref(name, "");
 }
 
+function getResidentMemoryBytes() {
+  try {
+    return Cc["@mozilla.org/memory-reporter-manager;1"].getService(
+      Ci.nsIMemoryReporterManager
+    ).residentFast;
+  } catch (error) {
+    console.warn("Admin Mode TOTP could not read resident memory", error);
+    return -1;
+  }
+}
+
+function recordTotpMemoryCheckpoint(stage) {
+  const resident = getResidentMemoryBytes();
+  console.warn(
+    `[Admin Mode TOTP] ${stage}; resident=${resident} bytes (${(resident / 1024 / 1024).toFixed(1)} MiB)`
+  );
+}
+
 function base32Encode(bytes) {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
   let bits = 0;
@@ -397,30 +415,41 @@ export const ManagementRestrictions = {
     return { secret, recoveryCode: makeRecoveryCode(), otpauthURI };
   },
   async completeTotpSetup(secret, recoveryCode, code) {
+    recordTotpMemoryCheckpoint("setup-start");
     const normalizedSecret = secret.replace(/\s|=/g, "").toUpperCase();
     const normalizedCode = code.trim();
     if (!/^\d{6}$/.test(normalizedCode)) {
+      recordTotpMemoryCheckpoint("invalid-code");
       return false;
     }
     const acceptedStep = await matchingTotpStep(
       normalizedSecret,
       normalizedCode
     );
+    recordTotpMemoryCheckpoint("totp-validation-complete");
     if (acceptedStep < 0) {
+      recordTotpMemoryCheckpoint("totp-validation-rejected");
       return false;
     }
+    recordTotpMemoryCheckpoint("before-oskeystore-encrypt");
     const encryptedSecret = await OSKeyStore.encrypt(normalizedSecret);
+    recordTotpMemoryCheckpoint("after-oskeystore-encrypt");
     Services.prefs.setStringPref(TOTP_SECRET_PREF, encryptedSecret);
+    recordTotpMemoryCheckpoint("secret-pref-saved");
     Services.prefs.setStringPref(
       TOTP_RECOVERY_HASH_PREF,
       await sha256(recoveryCode.toUpperCase())
     );
+    recordTotpMemoryCheckpoint("recovery-hash-saved");
     Services.prefs.setIntPref(TOTP_LAST_STEP_PREF, acceptedStep);
     clearUserPrefIfSet(TOTP_FAILURES_PREF);
     clearUserPrefIfSet(TOTP_LOCKOUT_PREF);
+    recordTotpMemoryCheckpoint("totp-prefs-saved");
     setAdminModeEnabled(false);
+    recordTotpMemoryCheckpoint("setup-complete");
     return true;
   },
+  recordTotpMemoryCheckpoint,
   isTotpConfigured,
   ensureAdminModeEnabled,
   isAdminModeEnabled,

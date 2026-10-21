@@ -297,6 +297,7 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
     const setup = this.pendingTotpSetup;
     this.totpSubmitting = true;
     this.totpConfirmButton.disabled = true;
+    ManagementRestrictions.recordTotpMemoryCheckpoint("verify-click");
     try {
       const configured = await ManagementRestrictions.completeTotpSetup(
         setup.secret,
@@ -324,6 +325,7 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
       );
       this.totpError.hidden = false;
     } finally {
+      ManagementRestrictions.recordTotpMemoryCheckpoint("verify-finished");
       this.totpSubmitting = false;
       this.totpConfirmButton.disabled = false;
     }

@@ -41,14 +41,12 @@
   },
   "scripts": {
     "prepare": "ts-patch install -s",
-
     "linux-configure": "./mach configure",
     "linux-build": "./mach --no-interactive bootstrap --application-choice=\"Firefox for Desktop Artifact Mode\" && ./mach build",
     "linux-package": "./mach package",
-    "linux-run": "./mach run",
+    "linux-run": "bash ./tools/linux-run-with-memory-log.sh",
     "linux-build-package": "npm run linux-build && npm run linux-package",
     "linux-build-run": "npm run linux-build && npm run linux-run",
-
     "android-configure": "./mach configure",
     "android-build": "./mach build",
     "android-build-apk": "./mach gradle --no-configuration-cache --max-workers=2 -Dorg.gradle.parallel=false fenix:assembleDebug",
@@ -57,7 +55,6 @@
     "android-install-apk": "adb install -r objdir-frontend/gradle/build/mobile/android/fenix/app/outputs/apk/debug/fenix-arm64-v8a-debug.apk",
     "android-check-abi": "unzip -l objdir-frontend/gradle/build/mobile/android/fenix/app/outputs/apk/debug/fenix-arm64-v8a-debug.apk | grep 'lib/arm64-v8a/libxul.so'",
     "android-build-install": "npm run android-build && npm run android-build-apk && npm run android-check-abi && npm run android-install-apk",
-
     "mach-gradle": "./mach gradle --no-configuration-cache --max-workers=2 -Dorg.gradle.parallel=false fenix:assembleDebug"
   },
   "notes(private)": "We don't want to publish to npm, so this is marked as private",
