@@ -198,11 +198,7 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
     this.totpDialog.addEventListener("input", this);
     this.totpDialog.addEventListener("change", this);
     this.adminModeObserver = {
-      observe: () => {
-        console.warn("[Admin Mode TOTP] header-admin-mode-observer-start");
-        this.updateAdminModeToggle();
-        console.warn("[Admin Mode TOTP] header-admin-mode-observer-finished");
-      },
+      observe: () => this.updateAdminModeToggle(),
     };
     Services.obs.addObserver(
       this.adminModeObserver,
@@ -317,8 +313,6 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
       }
       if (e.target.closest(".admin-mode-totp-confirm")) {
         await this.confirmTotpSetup();
-        console.warn("[Admin Mode TOTP] verify-event-handler-resumed");
-        console.warn("[Admin Mode TOTP] verify-event-handler-return");
         return;
       }
       if (e.target.closest(".admin-mode-totp-recover")) {
@@ -420,7 +414,6 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
     const setup = this.pendingTotpSetup;
     this.totpSubmitting = true;
     this.totpConfirmButton.disabled = true;
-    ManagementRestrictions.recordTotpMemoryCheckpoint("verify-click");
     try {
       const configured = await ManagementRestrictions.completeTotpSetup(
         setup.secret,
@@ -448,19 +441,8 @@ class AddonPageHeader extends AboutAddonsHTMLElement {
       );
       this.totpError.hidden = false;
     } finally {
-      ManagementRestrictions.recordTotpMemoryCheckpoint("verify-finished");
       this.totpSubmitting = false;
       this.totpConfirmButton.disabled = false;
-      console.warn("[Admin Mode TOTP] verify-ui-reset-complete");
-      for (const delay of [1000, 5000, 15000]) {
-        console.warn(`[Admin Mode TOTP] scheduling-post-verify-${delay}ms`);
-        setTimeout(() => {
-          console.warn(`[Admin Mode TOTP] post-verify-${delay}ms-fired`);
-          ManagementRestrictions.recordTotpMemoryCheckpoint(
-            `verify-finished-plus-${delay}ms`
-          );
-        }, delay);
-      }
     }
   }
 }

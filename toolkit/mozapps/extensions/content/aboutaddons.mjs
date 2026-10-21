@@ -43,19 +43,7 @@ const ADMIN_MODE_RESTRICTED_ACTIONS = new Set([
   "toggle-permission",
 ]);
 
-let adminModeControlUpdateCount = 0;
-let adminModeMutationCallbackCount = 0;
-
 function updateAdminModeControls(root = document) {
-  adminModeControlUpdateCount++;
-  if (
-    adminModeControlUpdateCount === 1 ||
-    adminModeControlUpdateCount % 10000 === 0
-  ) {
-    console.warn(
-      `[Admin Mode TOTP] aboutaddons-control-update; count=${adminModeControlUpdateCount}`
-    );
-  }
   const enabled = lazy.ManagementRestrictions.isAdminModeEnabled();
   document.body.toggleAttribute("admin-mode-disabled", !enabled);
 
@@ -305,11 +293,7 @@ async function initialize() {
 
   const adminModeObserver = {
     observe() {
-      console.warn("[Admin Mode TOTP] aboutaddons-admin-mode-observer-start");
       updateAdminModeControls();
-      console.warn(
-        "[Admin Mode TOTP] aboutaddons-admin-mode-observer-finished"
-      );
     },
   };
   Services.obs.addObserver(
@@ -317,15 +301,6 @@ async function initialize() {
     "webextension-admin-mode-changed"
   );
   const adminModeMutationObserver = new MutationObserver(records => {
-    adminModeMutationCallbackCount++;
-    if (
-      adminModeMutationCallbackCount === 1 ||
-      adminModeMutationCallbackCount % 10000 === 0
-    ) {
-      console.warn(
-        `[Admin Mode TOTP] aboutaddons-mutation-observer; callbacks=${adminModeMutationCallbackCount}; records=${records.length}`
-      );
-    }
     for (const record of records) {
       if (record.type === "attributes") {
         updateAdminModeControls(record.target);
@@ -336,14 +311,6 @@ async function initialize() {
           }
         }
       }
-    }
-    if (
-      adminModeMutationCallbackCount === 1 ||
-      adminModeMutationCallbackCount % 10000 === 0
-    ) {
-      console.warn(
-        `[Admin Mode TOTP] aboutaddons-mutation-observer-finished; callbacks=${adminModeMutationCallbackCount}`
-      );
     }
   });
   adminModeMutationObserver.observe(document.body, {
