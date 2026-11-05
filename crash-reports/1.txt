@@ -1,0 +1,176 @@
+┬───
+│ GC Root: System class
+│
+├─ android.view.accessibility.AccessibilityManager class
+│    Leaking: NO (BrowserFragment↓ is not leaking and a class is never leaking)
+│    ↓ static AccessibilityManager.sInstance
+├─ android.view.accessibility.AccessibilityManager instance
+│    Leaking: NO (BrowserFragment↓ is not leaking)
+│    ↓ AccessibilityManager.mAccessibilityStateChangeListeners
+├─ android.util.ArrayMap instance
+│    Leaking: NO (BrowserFragment↓ is not leaking)
+│    ↓ ArrayMap.mArray
+├─ java.lang.Object[] array
+│    Leaking: NO (BrowserFragment↓ is not leaking)
+│    ↓ Object[18]
+├─ org.mozilla.fenix.browser.BrowserFragment instance
+│    Leaking: NO (Fragment.mLifecycleRegistry.state is RESUMED)
+│    Fragment.mTag = a548b0a6-454a-45c4-886d-4d638861c775
+│    ↓ Fragment.mFragmentManager
+│               ~~~~~~~~~~~~~~~~
+├─ androidx.fragment.app.FragmentManagerImpl instance
+│    Leaking: UNKNOWN
+│    Retaining 2,1 kB in 72 objects
+│    ↓ FragmentManager.mNonConfig
+│                      ~~~~~~~~~~
+├─ androidx.fragment.app.FragmentManagerViewModel instance
+│    Leaking: UNKNOWN
+│    Retaining 242,7 kB in 6104 objects
+│    ↓ FragmentManagerViewModel.mViewModelStores
+│                               ~~~~~~~~~~~~~~~~
+├─ java.util.HashMap instance
+│    Leaking: UNKNOWN
+│    Retaining 242,3 kB in 6090 objects
+│    ↓ HashMap["565c7023-74fa-40ea-a922-8b1fec27ca91"]
+│             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+├─ androidx.lifecycle.ViewModelStore instance
+│    Leaking: UNKNOWN
+│    Retaining 233,4 kB in 5866 objects
+│    ↓ ViewModelStore.map
+│                     ~~~
+├─ java.util.LinkedHashMap instance
+│    Leaking: UNKNOWN
+│    Retaining 233,4 kB in 5865 objects
+│    ↓ LinkedHashMap["androidx.lifecycle.ViewModelProvider.DefaultKey:mozilla.
+│                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+│    components.lib.state.helpers.StoreProvider"]
+├─ mozilla.components.lib.state.helpers.StoreProvider instance
+│    Leaking: UNKNOWN
+│    Retaining 231,4 kB in 5811 objects
+│    ↓ StoreProvider.states
+│                    ~~~~~~
+├─ java.util.LinkedHashMap instance
+│    Leaking: UNKNOWN
+│    Retaining 231,1 kB in 5802 objects
+│    ↓ LinkedHashMap["org.mozilla.fenix.tabstray.redux.store.TabsTrayStore"]
+│                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+├─ org.mozilla.fenix.tabstray.redux.state.TabsTrayState instance
+│    Leaking: UNKNOWN
+│    Retaining 230,9 kB in 5799 objects
+│    ↓ TabsTrayState.sync
+│                    ~~~~
+├─ org.mozilla.fenix.tabstray.redux.state.TabsTrayState$SyncState instance
+│    Leaking: UNKNOWN
+│    Retaining 228,3 kB in 5731 objects
+│    ↓ TabsTrayState$SyncState.syncedTabs
+│                              ~~~~~~~~~~
+├─ java.util.Collections$SingletonList instance
+│    Leaking: UNKNOWN
+│    Retaining 228,3 kB in 5728 objects
+│    ↓ Collections$SingletonList.element
+│                                ~~~~~~~
+├─ org.mozilla.fenix.tabstray.syncedtabs.SyncedTabsListItem$Error instance
+│    Leaking: UNKNOWN
+│    Retaining 228,3 kB in 5727 objects
+│    ↓ SyncedTabsListItem$Error.errorButton
+│                               ~~~~~~~~~~~
+├─ org.mozilla.fenix.tabstray.syncedtabs.SyncedTabsListItem$ErrorButton instance
+│    Leaking: UNKNOWN
+│    Retaining 228,3 kB in 5726 objects
+│    ↓ SyncedTabsListItem$ErrorButton.onClick
+│                                     ~~~~~~~
+├─ org.mozilla.fenix.tabstray.ext.
+│  SyncedTabsViewErrorTypeKt$$ExternalSyntheticLambda0 instance
+│    Leaking: UNKNOWN
+│    Retaining 228,2 kB in 5725 objects
+│    ↓ SyncedTabsViewErrorTypeKt$$ExternalSyntheticLambda0.f$0
+│                                                          ~~~
+├─ androidx.navigation.NavHostController instance
+│    Leaking: UNKNOWN
+│    Retaining 228,2 kB in 5724 objects
+│    activity instance of org.mozilla.fenix.HomeActivity with mDestroyed = true
+│    context instance of org.mozilla.fenix.HomeActivity with mDestroyed = true
+│    ↓ NavController.impl
+│                    ~~~~
+├─ androidx.navigation.internal.NavControllerImpl instance
+│    Leaking: UNKNOWN
+│    Retaining 84,0 kB in 2169 objects
+│    ↓ NavControllerImpl.navigatorState
+│                        ~~~~~~~~~~~~~~
+├─ java.util.LinkedHashMap instance
+│    Leaking: UNKNOWN
+│    Retaining 258 B in 7 objects
+│    ↓ LinkedHashMap[key()]
+│                   ~~~~~~~
+├─ org.mozilla.fenix.navigation.compat.MotionAwareFragmentNavigator instance
+│    Leaking: UNKNOWN
+│    Retaining 201 B in 7 objects
+│    context instance of org.mozilla.fenix.HomeActivity with mDestroyed = true
+│    ↓ FragmentNavigator.fragmentManager
+│                        ~~~~~~~~~~~~~~~
+├─ androidx.fragment.app.FragmentManagerImpl instance
+│    Leaking: UNKNOWN
+│    Retaining 37,0 kB in 982 objects
+│    ↓ FragmentManager.mBackStack
+│                      ~~~~~~~~~~
+├─ java.util.ArrayList instance
+│    Leaking: UNKNOWN
+│    Retaining 28,8 kB in 671 objects
+│    ↓ ArrayList[0]
+│               ~~~
+├─ androidx.fragment.app.BackStackRecord instance
+│    Leaking: UNKNOWN
+│    Retaining 4,7 kB in 184 objects
+│    ↓ FragmentTransaction.mOps
+│                          ~~~~
+├─ java.util.ArrayList instance
+│    Leaking: UNKNOWN
+│    Retaining 4,7 kB in 183 objects
+│    ↓ ArrayList[0]
+│               ~~~
+├─ androidx.fragment.app.FragmentTransaction$Op instance
+│    Leaking: UNKNOWN
+│    Retaining 41 B in 1 objects
+│    ↓ FragmentTransaction$Op.mFragment
+│                             ~~~~~~~~~
+╰→ org.mozilla.fenix.home.HomeFragment instance
+​     Leaking: YES (ObjectWatcher was watching this because org.mozilla.fenix.
+​     home.HomeFragment received Fragment#onDestroy() callback. Conflicts with
+​     Fragment.mLifecycleRegistry.state is INITIALIZED)
+​     Retaining 4,4 kB in 176 objects
+​     key = 8e2a4bd9-96db-49f7-b3cd-b554cf755292
+​     watchDurationMillis = 6495
+​     retainedDurationMillis = 1082
+
+METADATA
+
+Build.VERSION.SDK_INT: 36
+Build.MANUFACTURER: samsung
+LeakCanary version: 2.14
+App process name: org.mozilla.fenix.debug
+Class count: 37000
+Instance count: 364800
+Primitive array count: 217322
+Object array count: 43744
+Thread count: 76
+Heap total bytes: 36736295
+Bitmap count: 36
+Bitmap total bytes: 1054188
+Large bitmap count: 0
+Large bitmap total bytes: 0
+Db 1: open /data/user/0/org.mozilla.fenix.debug/databases/recently_closed_tabs
+Db 2: open /data/user/0/org.mozilla.fenix.debug/no_backup/androidx.work.workdb
+Db 3: open /data/user/0/org.mozilla.fenix.
+debug/databases/mozac_downloads_database
+Db 4: open /data/user/0/org.mozilla.fenix.debug/databases/tab_collections
+Db 5: open /data/user/0/org.mozilla.fenix.
+debug/databases/content_recommendations
+Db 6: open /data/user/0/org.mozilla.fenix.debug/databases/tab_groups
+Db 7: open /data/user/0/org.mozilla.fenix.debug/databases/manifests
+Db 8: open /data/user/0/org.mozilla.fenix.debug/databases/top_sites
+Db 9: open /data/user/0/org.mozilla.fenix.
+debug/databases/site_permissions_database
+Stats: LruCache[maxSize=3000,hits=157462,misses=298594,hitRate=34%]
+RandomAccess[bytes=15386934,reads=298594,travel=151321080986,range=46801875,size
+=57764702]
+Analysis duration: 47197 ms
