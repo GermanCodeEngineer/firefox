@@ -1,0 +1,238 @@
+┬───
+│ GC Root: Global variable in native code
+│
+├─ org.mozilla.geckoview.SessionAccessibility$NativeProvider instance
+│    Leaking: UNKNOWN
+│    Retaining 20 B in 1 objects
+│    ↓ SessionAccessibility$NativeProvider.this$0
+│                                          ~~~~~~
+├─ org.mozilla.geckoview.SessionAccessibility instance
+│    Leaking: UNKNOWN
+│    Retaining 38 B in 1 objects
+│    ↓ SessionAccessibility.mSession
+│                           ~~~~~~~~
+├─ org.mozilla.geckoview.GeckoSession instance
+│    Leaking: UNKNOWN
+│    Retaining 1,0 MB in 21387 objects
+│    ↓ GeckoSession.mNativeQueue
+│                   ~~~~~~~~~~~~
+├─ org.mozilla.gecko.NativeQueue instance
+│    Leaking: UNKNOWN
+│    Retaining 987,7 kB in 20466 objects
+│    ↓ NativeQueue.mQueue
+│                  ~~~~~~
+├─ java.util.ArrayList instance
+│    Leaking: UNKNOWN
+│    Retaining 987,7 kB in 20465 objects
+│    ↓ ArrayList[2]
+│               ~~~
+├─ org.mozilla.gecko.NativeQueue$QueuedCall instance
+│    Leaking: UNKNOWN
+│    Retaining 986,9 kB in 20430 objects
+│    ↓ NativeQueue$QueuedCall.args
+│                             ~~~~
+├─ java.lang.Object[] array
+│    Leaking: UNKNOWN
+│    Retaining 986,9 kB in 20428 objects
+│    ↓ Object[1]
+│            ~~~
+├─ org.mozilla.gecko.EventDispatcher$JavaCallbackDelegate instance
+│    Leaking: UNKNOWN
+│    Retaining 986,9 kB in 20427 objects
+│    ↓ EventDispatcher$JavaCallbackDelegate.mCallback
+│                                           ~~~~~~~~~
+├─ org.mozilla.gecko.EventDispatcher$CallbackResult instance
+│    Leaking: UNKNOWN
+│    Retaining 986,8 kB in 20426 objects
+│    ↓ GeckoResult.mListeners
+│                  ~~~~~~~~~~
+├─ androidx.collection.SimpleArrayMap instance
+│    Leaking: UNKNOWN
+│    Retaining 986,8 kB in 20424 objects
+│    ↓ SimpleArrayMap.array
+│                     ~~~~~
+├─ java.lang.Object[] array
+│    Leaking: UNKNOWN
+│    Retaining 986,7 kB in 20422 objects
+│    ↓ Object[1]
+│            ~~~
+├─ java.util.ArrayList instance
+│    Leaking: UNKNOWN
+│    Retaining 986,7 kB in 20421 objects
+│    ↓ ArrayList[0]
+│               ~~~
+├─ org.mozilla.geckoview.GeckoResult$$ExternalSyntheticLambda7 instance
+│    Leaking: UNKNOWN
+│    Retaining 986,7 kB in 20419 objects
+│    ↓ GeckoResult$$ExternalSyntheticLambda7.f$1
+│                                            ~~~
+├─ org.mozilla.geckoview.GeckoResult instance
+│    Leaking: UNKNOWN
+│    Retaining 986,7 kB in 20416 objects
+│    ↓ GeckoResult.mListeners
+│                  ~~~~~~~~~~
+├─ androidx.collection.SimpleArrayMap instance
+│    Leaking: UNKNOWN
+│    Retaining 986,6 kB in 20414 objects
+│    ↓ SimpleArrayMap.array
+│                     ~~~~~
+├─ java.lang.Object[] array
+│    Leaking: UNKNOWN
+│    Retaining 986,6 kB in 20412 objects
+│    ↓ Object[1]
+│            ~~~
+├─ java.util.ArrayList instance
+│    Leaking: UNKNOWN
+│    Retaining 986,5 kB in 20411 objects
+│    ↓ ArrayList[0]
+│               ~~~
+├─ org.mozilla.geckoview.GeckoResult$$ExternalSyntheticLambda7 instance
+│    Leaking: UNKNOWN
+│    Retaining 986,5 kB in 20409 objects
+│    ↓ GeckoResult$$ExternalSyntheticLambda7.f$2
+│                                            ~~~
+├─ mozilla.components.browser.engine.gecko.
+│  GeckoEngineSession$$ExternalSyntheticLambda59 instance
+│    Leaking: UNKNOWN
+│    Retaining 28 B in 2 objects
+│    ↓ GeckoEngineSession$$ExternalSyntheticLambda59.f$0
+│                                                    ~~~
+├─ org.mozilla.fenix.summarization.eligibility.
+│  DefaultSummarizationEligibilityChecker$getPageMetadata$2$1$1$2 instance
+│    Leaking: UNKNOWN
+│    Retaining 12 B in 1 objects
+│    Anonymous class implementing kotlin.jvm.functions.Function1
+│    ↓ DefaultSummarizationEligibilityChecker$getPageMetadata$2$1$1$2.
+│    $continuation
+│    ~~~~~~~~~~~~~
+├─ kotlinx.coroutines.CancellableContinuationImpl instance
+│    Leaking: UNKNOWN
+│    Retaining 986,4 kB in 20401 objects
+│    ↓ CancellableContinuationImpl._parentHandle$volatile
+│                                  ~~~~~~~~~~~~~~~~~~~~~~
+├─ kotlinx.coroutines.ChildContinuation instance
+│    Leaking: UNKNOWN
+│    Retaining 28 B in 1 objects
+│    ↓ JobNode.job
+│              ~~~
+├─ kotlinx.coroutines.UndispatchedCoroutine instance
+│    Leaking: UNKNOWN
+│    Retaining 986,2 kB in 20395 objects
+│    ↓ ScopeCoroutine.uCont
+│                     ~~~~~
+├─ org.mozilla.fenix.summarization.eligibility.
+│  DefaultSummarizationEligibilityChecker$getPageMetadata$1 instance
+│    Leaking: UNKNOWN
+│    Retaining 986,0 kB in 20386 objects
+│    Anonymous subclass of kotlin.coroutines.jvm.internal.ContinuationImpl
+│    ↓ BaseContinuationImpl.completion
+│                           ~~~~~~~~~~
+├─ org.mozilla.fenix.summarization.eligibility.
+│  DefaultSummarizationEligibilityChecker$checkLanguage$1 instance
+│    Leaking: UNKNOWN
+│    Retaining 986,0 kB in 20385 objects
+│    Anonymous subclass of kotlin.coroutines.jvm.internal.ContinuationImpl
+│    ↓ BaseContinuationImpl.completion
+│                           ~~~~~~~~~~
+├─ org.mozilla.fenix.components.menu.middleware.
+│  MenuDialogMiddleware$checkSummarizationEligibility$1 instance
+│    Leaking: UNKNOWN
+│    Retaining 985,9 kB in 20384 objects
+│    Anonymous subclass of kotlin.coroutines.jvm.internal.ContinuationImpl
+│    ↓ BaseContinuationImpl.completion
+│                           ~~~~~~~~~~
+├─ org.mozilla.fenix.components.menu.middleware.
+│  MenuDialogMiddleware$setupPageSummarizationState$1 instance
+│    Leaking: UNKNOWN
+│    Retaining 769,3 kB in 14993 objects
+│    Anonymous subclass of kotlin.coroutines.jvm.internal.ContinuationImpl
+│    ↓ MenuDialogMiddleware$setupPageSummarizationState$1.L$0
+│                                                         ~~~
+├─ org.mozilla.fenix.components.menu.store.MenuStore instance
+│    Leaking: UNKNOWN
+│    Retaining 769,1 kB in 14990 objects
+│    ↓ Store.middleware
+│            ~~~~~~~~~~
+├─ java.util.Arrays$ArrayList instance
+│    Leaking: UNKNOWN
+│    Retaining 28 B in 2 objects
+│    ↓ Arrays$ArrayList.a
+│                       ~
+├─ kotlin.jvm.functions.Function3[] array
+│    Leaking: UNKNOWN
+│    Retaining 12 B in 1 objects
+│    ↓ Function3[1]
+│               ~~~
+├─ org.mozilla.fenix.components.menu.middleware.MenuNavigationMiddleware
+│  instance
+│    Leaking: UNKNOWN
+│    Retaining 193 B in 11 objects
+│    ↓ MenuNavigationMiddleware.navController
+│                               ~~~~~~~~~~~~~
+├─ androidx.navigation.NavHostController instance
+│    Leaking: UNKNOWN
+│    Retaining 98,9 kB in 2771 objects
+│    activity instance of org.mozilla.fenix.HomeActivity with mDestroyed = true
+│    context instance of org.mozilla.fenix.HomeActivity with mDestroyed = true
+│    ↓ NavController.impl
+│                    ~~~~
+├─ androidx.navigation.internal.NavControllerImpl instance
+│    Leaking: UNKNOWN
+│    Retaining 80,8 kB in 2085 objects
+│    ↓ NavControllerImpl.navigatorState
+│                        ~~~~~~~~~~~~~~
+├─ java.util.LinkedHashMap instance
+│    Leaking: UNKNOWN
+│    Retaining 258 B in 7 objects
+│    ↓ LinkedHashMap[key()]
+│                   ~~~~~~~
+├─ androidx.navigation.fragment.DialogFragmentNavigator instance
+│    Leaking: UNKNOWN
+│    Retaining 234 B in 6 objects
+│    context instance of org.mozilla.fenix.HomeActivity with mDestroyed = true
+│    ↓ DialogFragmentNavigator.fragmentManager
+│                              ~~~~~~~~~~~~~~~
+├─ androidx.fragment.app.FragmentManagerImpl instance
+│    Leaking: UNKNOWN
+│    Retaining 6,3 kB in 251 objects
+│    ↓ FragmentManager.mPrimaryNav
+│                      ~~~~~~~~~~~
+╰→ org.mozilla.fenix.home.HomeFragment instance
+​     Leaking: YES (ObjectWatcher was watching this because org.mozilla.fenix.
+​     home.HomeFragment received Fragment#onDestroy() callback. Conflicts with
+​     Fragment.mLifecycleRegistry.state is INITIALIZED)
+​     Retaining 4,3 kB in 173 objects
+​     key = 9b262666-9059-4dcc-8ded-18b7125db387
+​     watchDurationMillis = 8235
+​     retainedDurationMillis = 2989
+
+METADATA
+
+Build.VERSION.SDK_INT: 36
+Build.MANUFACTURER: samsung
+LeakCanary version: 2.14
+App process name: org.mozilla.fenix.debug
+Class count: 38159
+Instance count: 358234
+Primitive array count: 218145
+Object array count: 43258
+Thread count: 82
+Heap total bytes: 38453004
+Bitmap count: 68
+Bitmap total bytes: 940228
+Large bitmap count: 0
+Large bitmap total bytes: 0
+Db 1: open /data/user/0/org.mozilla.fenix.debug/databases/recently_closed_tabs
+Db 2: open /data/user/0/org.mozilla.fenix.debug/no_backup/androidx.work.workdb
+Db 3: open /data/user/0/org.mozilla.fenix.
+debug/databases/mozac_downloads_database
+Db 4: open /data/user/0/org.mozilla.fenix.debug/databases/tab_collections
+Db 5: open /data/user/0/org.mozilla.fenix.debug/databases/tab_groups
+Db 6: open /data/user/0/org.mozilla.fenix.debug/databases/manifests
+Db 7: open /data/user/0/org.mozilla.fenix.debug/databases/top_sites
+Db 8: open /data/user/0/org.mozilla.fenix.
+debug/databases/content_recommendations
+Stats: LruCache[maxSize=3000,hits=157127,misses=302815,hitRate=34%]
+RandomAccess[bytes=15632923,reads=302815,travel=161973574340,range=48380238,size
+=59538551]
+Analysis duration: 151801 ms
