@@ -914,6 +914,12 @@
     <string name="preferences_downloads_2">Download Settings</string>
     <!-- Preference for enabling gecko engine logs -->
     <string name="preferences_enable_gecko_logs">Enable Gecko logs</string>
+    <string name="preferences_saved_error_log">Saved error log</string>
+    <string name="preferences_saved_error_log_empty">No errors have been saved.</string>
+    <string name="preferences_saved_error_log_copy">Copy</string>
+    <string name="preferences_saved_error_log_clear">Clear</string>
+    <string name="preferences_saved_error_log_copied">Diagnostic log copied</string>
+    <string name="preferences_saved_error_log_cleared">Diagnostic log cleared</string>
     <!-- Message to indicate users that we are quitting the application to apply the changes -->
     <string name="quit_application">Quitting the application to apply changes…</string>
 

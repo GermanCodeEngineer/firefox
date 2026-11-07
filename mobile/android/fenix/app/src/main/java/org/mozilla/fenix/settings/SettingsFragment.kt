@@ -5,6 +5,8 @@
 package org.mozilla.fenix.settings
 
 import android.Manifest.permission.ACCESS_LOCAL_NETWORK
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -14,6 +16,9 @@ import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.ScrollView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -68,6 +73,7 @@ import org.mozilla.fenix.GleanMetrics.TrackingProtection
 import org.mozilla.fenix.GleanMetrics.Translations
 import org.mozilla.fenix.GleanMetrics.Vpn
 import org.mozilla.fenix.HomeActivity
+import org.mozilla.fenix.PersistentDiagnosticLog
 import org.mozilla.fenix.R
 import org.mozilla.fenix.components.Components
 import org.mozilla.fenix.components.accounts.FenixFxAEntryPoint
@@ -364,6 +370,11 @@ class SettingsFragment : PreferenceFragmentCompat(), SystemInsetsPaddedFragment 
         // Hide the scrollbar so the animation looks smoother
         val recyclerView = requireView().findViewById<RecyclerView>(R.id.recycler_view)
         recyclerView.isVerticalScrollBarEnabled = false
+
+        if (preference.key == getPreferenceKey(R.string.pref_key_diagnostic_log)) {
+            showSavedDiagnosticLog()
+            return true
+        }
 
         val directions: NavDirections? =
             when (preference.key) {
@@ -678,6 +689,44 @@ class SettingsFragment : PreferenceFragmentCompat(), SystemInsetsPaddedFragment 
         setupDnsOverHttpsPreference(settings)
         setupEmailMaskPreference(settings, requireComponents)
         setupAutofillPreferences(settings)
+    }
+
+    private fun showSavedDiagnosticLog() {
+        val log = PersistentDiagnosticLog.read()
+            .ifEmpty { getString(R.string.preferences_saved_error_log_empty) }
+        val textView = TextView(requireContext()).apply {
+            text = log.takeLast(64 * 1024)
+            setTextIsSelectable(true)
+            val padding = (16 * resources.displayMetrics.density).toInt()
+            setPadding(padding, padding, padding, padding)
+        }
+        val scrollView = ScrollView(requireContext()).apply {
+            addView(
+                textView,
+                ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT),
+            )
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                (resources.displayMetrics.heightPixels * 0.6).toInt(),
+            )
+        }
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.preferences_saved_error_log)
+            .setView(scrollView)
+            .setPositiveButton(R.string.preferences_saved_error_log_copy) { _, _ ->
+                ContextCompat.getSystemService(requireContext(), ClipboardManager::class.java)?.setPrimaryClip(
+                    ClipData.newPlainText(getString(R.string.preferences_saved_error_log), log),
+                )
+                Toast.makeText(context, R.string.preferences_saved_error_log_copied, Toast.LENGTH_SHORT).show()
+            }
+            .setNeutralButton(R.string.preferences_saved_error_log_clear) { dialog, _ ->
+                PersistentDiagnosticLog.clear()
+                dialog.dismiss()
+                Toast.makeText(context, R.string.preferences_saved_error_log_cleared, Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun setupAutofillPreferences(settings: Settings) {

@@ -236,6 +236,12 @@
             android:title="@string/preferences_enable_gecko_logs" />
 
         <androidx.preference.Preference
+            android:key="@string/pref_key_diagnostic_log"
+            android:title="@string/preferences_saved_error_log"
+            app:iconSpaceReserved="false"
+            app:isPreferenceVisible="@bool/IS_DEBUG" />
+
+        <androidx.preference.Preference
             android:key="@string/pref_key_local_network_access"
             app:iconSpaceReserved="false"
             android:title="@string/preferences_local_network_access" />

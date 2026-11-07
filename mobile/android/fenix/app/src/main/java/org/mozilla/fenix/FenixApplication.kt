@@ -231,6 +231,10 @@ open class FenixApplication : Application(), Provider, ThemeProvider {
         // Capture A-C logs to Android logcat. Note that gecko maybe directly post to logcat
         // regardless of what we do here.
         Log.addSink(FenixLogSink(logsDebug = Config.channel.isDebug, AndroidLogSink()))
+        if (Config.channel.isDebug) {
+            PersistentDiagnosticLog.initialize(this)
+            Log.addSink(PersistentDiagnosticLog.sink)
+        }
 
         // Register a deferred initializer for crash reporting that will be called lazily when
         // CrashReporter.requireInstance is first accessed. This allows all processes to register
@@ -765,7 +769,11 @@ open class FenixApplication : Application(), Provider, ThemeProvider {
     }
 
     private fun setupCrashReporting(): CrashReporter {
-        return components.analytics.crashReporter.install(this, ::handleCaughtException)
+        val reporter = components.analytics.crashReporter.install(this, ::handleCaughtException)
+        if (Config.channel.isDebug) {
+            PersistentDiagnosticLog.installUncaughtExceptionRecorder()
+        }
+        return reporter
     }
 
     private fun handleCaughtException() {
