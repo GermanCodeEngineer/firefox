@@ -1,7 +1,0 @@
-- Sync changes from upstream/main => possibly find long term solution for auto merges?
-- Todo: Investigate and improve firefox performance
-- Todo: Implement Website blocking in mobile version either through extension or built-in.
-- Todo: create extension removing the logout button from youtube web
-- Todo: create extension to disable the add/remove buttons on mozilla addons website when admin mode is off.
-- Todo: create browser permission. if an extension has this permission, the browser asks it for permission everytime before even sending the website request (Or make it an event: The extension must respond to an event in time, if it does the browser waits for permission to display the fetched website)
-- Todo: find a way to prevent installing other browsers on surface
