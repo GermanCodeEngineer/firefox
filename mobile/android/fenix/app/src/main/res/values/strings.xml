@@ -299,6 +299,11 @@
     <string name="admin_mode_authentication_failed">The code was not accepted.</string>
     <string name="admin_mode_authentication_required">Admin Mode is off. Turn it on in Add-ons Manager to change extensions.</string>
     <string name="admin_mode_setup_success">Authenticator is set up. Use a code to turn Admin Mode on.</string>
+    <string name="admin_mode_choose_app">Choose shortcut app</string>
+    <string name="admin_mode_open_app">Open app</string>
+    <string name="admin_mode_remove_shortcut">Remove shortcut</string>
+    <string name="admin_mode_app_unavailable">The shortcut app could not be opened. Choose an available app.</string>
+    <string name="admin_mode_no_apps">No apps are available for this shortcut.</string>
 
     <!-- Browser Toolbar -->
     <!-- Content description for the translate page toolbar button that opens the translations dialog when no translation has occurred. -->

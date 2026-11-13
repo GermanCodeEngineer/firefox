@@ -20,6 +20,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
@@ -35,6 +36,7 @@ import com.google.zxing.qrcode.QRCodeWriter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import mozilla.components.browser.engine.gecko.await
 import mozilla.components.concept.engine.webextension.InstallationMethod
 import mozilla.components.feature.addons.Addon
@@ -66,6 +68,8 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management),
     private var addons: List<Addon> = emptyList()
 
     private var adapter: AddonsManagerAdapter? = null
+
+    private val appShortcut by lazy { AdminModeAppShortcut(requireContext().applicationContext) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -267,6 +271,7 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management),
         }
         binding?.adminModeTotpSetup?.setOnClickListener { beginTotpSetup() }
         binding?.adminModeRecovery?.setOnClickListener { showEmergencyRecoveryPrompt() }
+        binding?.adminModeShortcutApp?.setOnClickListener { chooseShortcutApp() }
     }
 
     private fun refreshAdminModeState() {
@@ -311,10 +316,22 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management),
             .setTitle(R.string.admin_mode_title)
             .setView(input)
             .setNegativeButton(android.R.string.cancel) { _, _ -> refreshAdminModeState() }
+            .setNeutralButton(shortcutButtonLabel(), null)
             .setPositiveButton(android.R.string.ok, null)
             .create()
             .also { dialog ->
                 dialog.setOnShowListener {
+                    dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
+                        if (appShortcut.selectedComponent != null) {
+                            if (appShortcut.launch(requireActivity())) {
+                                return@setOnClickListener
+                            }
+                            Toast.makeText(requireContext(), R.string.admin_mode_app_unavailable, Toast.LENGTH_LONG).show()
+                        }
+                        chooseShortcutApp {
+                            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setText(shortcutButtonLabel())
+                        }
+                    }
                     dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                         onCode(input.text.toString())
                         dialog.dismiss()
@@ -322,6 +339,44 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management),
                 }
                 dialog.show()
             }
+    }
+
+    private fun shortcutButtonLabel() = if (appShortcut.selectedComponent == null) {
+        R.string.admin_mode_choose_app
+    } else {
+        R.string.admin_mode_open_app
+    }
+
+    private fun chooseShortcutApp(onSelectionChanged: () -> Unit = {}) {
+        val shortcut = appShortcut
+        viewLifecycleOwner.lifecycleScope.launch {
+            val apps = withContext(IO) { shortcut.availableApps() }
+            if (binding == null) {
+                return@launch
+            }
+            val builder = MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.admin_mode_choose_app)
+                .setNegativeButton(android.R.string.cancel, null)
+            if (apps.isEmpty()) {
+                builder.setMessage(R.string.admin_mode_no_apps)
+            } else {
+                builder.setSingleChoiceItems(
+                    apps.map { it.label }.toTypedArray(),
+                    apps.indexOfFirst { it.component == appShortcut.selectedComponent },
+                ) { dialog, position ->
+                    appShortcut.selectedComponent = apps[position].component
+                    onSelectionChanged()
+                    dialog.dismiss()
+                }
+            }
+            if (appShortcut.selectedComponent != null) {
+                builder.setNeutralButton(R.string.admin_mode_remove_shortcut) { _, _ ->
+                    appShortcut.selectedComponent = null
+                    onSelectionChanged()
+                }
+            }
+            builder.show()
+        }
     }
 
     private fun beginTotpSetup() {
