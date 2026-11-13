@@ -692,38 +692,48 @@ class SettingsFragment : PreferenceFragmentCompat(), SystemInsetsPaddedFragment 
     }
 
     private fun showSavedDiagnosticLog() {
-        val log = PersistentDiagnosticLog.read()
-            .ifEmpty { getString(R.string.preferences_saved_error_log_empty) }
-        val textView = TextView(requireContext()).apply {
-            text = log.takeLast(64 * 1024)
-            setTextIsSelectable(true)
-            val padding = (16 * resources.displayMetrics.density).toInt()
-            setPadding(padding, padding, padding, padding)
-        }
-        val scrollView = ScrollView(requireContext()).apply {
-            addView(
-                textView,
-                ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT),
-            )
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                (resources.displayMetrics.heightPixels * 0.6).toInt(),
+        viewLifecycleOwner.lifecycleScope.launch {
+            showSavedDiagnosticLog(
+                PersistentDiagnosticLog.read().ifEmpty { getString(R.string.preferences_saved_error_log_empty) }
             )
         }
+    }
+
+    private fun showSavedDiagnosticLog(log: String) {
+        val textView =
+            TextView(requireContext()).apply {
+                text = log.takeLast(64 * 1024)
+                setTextIsSelectable(true)
+                val padding = (16 * resources.displayMetrics.density).toInt()
+                setPadding(padding, padding, padding, padding)
+            }
+        val scrollView =
+            ScrollView(requireContext()).apply {
+                addView(
+                    textView,
+                    ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT),
+                )
+                layoutParams =
+                    ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        (resources.displayMetrics.heightPixels * 0.6).toInt(),
+                    )
+            }
 
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.preferences_saved_error_log)
             .setView(scrollView)
             .setPositiveButton(R.string.preferences_saved_error_log_copy) { _, _ ->
-                ContextCompat.getSystemService(requireContext(), ClipboardManager::class.java)?.setPrimaryClip(
-                    ClipData.newPlainText(getString(R.string.preferences_saved_error_log), log),
-                )
+                ContextCompat.getSystemService(requireContext(), ClipboardManager::class.java)
+                    ?.setPrimaryClip(ClipData.newPlainText(getString(R.string.preferences_saved_error_log), log))
                 Toast.makeText(context, R.string.preferences_saved_error_log_copied, Toast.LENGTH_SHORT).show()
             }
             .setNeutralButton(R.string.preferences_saved_error_log_clear) { dialog, _ ->
-                PersistentDiagnosticLog.clear()
-                dialog.dismiss()
-                Toast.makeText(context, R.string.preferences_saved_error_log_cleared, Toast.LENGTH_SHORT).show()
+                viewLifecycleOwner.lifecycleScope.launch {
+                    PersistentDiagnosticLog.clear()
+                    dialog.dismiss()
+                    Toast.makeText(context, R.string.preferences_saved_error_log_cleared, Toast.LENGTH_SHORT).show()
+                }
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
