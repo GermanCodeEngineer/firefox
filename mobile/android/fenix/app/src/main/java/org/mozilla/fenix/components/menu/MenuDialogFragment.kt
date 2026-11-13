@@ -33,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -65,7 +66,6 @@ import mozilla.components.feature.addons.Addon
 import mozilla.components.feature.automotive.isAndroidAutomotiveAvailable
 import mozilla.components.feature.ipprotection.store.IPProtectionAction
 import mozilla.components.feature.ipprotection.store.state.isEligible
-import mozilla.components.lib.state.helpers.StoreProvider.Companion.fragmentStore
 import mozilla.components.service.fxa.manager.AccountState.NotAuthenticated
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import mozilla.components.support.base.log.logger.Logger
@@ -132,6 +132,7 @@ import org.mozilla.fenix.utils.exitSubmenu
 import org.mozilla.fenix.webcompat.DefaultWebCompatReporterMoreInfoSender
 import org.mozilla.fenix.webcompat.middleware.DefaultWebCompatReporterRetrievalService
 
+private const val MORE_MENU_EXPANDED = "more_menu_expanded"
 private const val EXPANDED_OFFSET = 56
 private const val HIDING_FRICTION = 0.9f
 private const val PRIVATE_HOME_MENU_BACKGROUND_ALPHA = 100
@@ -154,6 +155,7 @@ class MenuDialogFragment : BottomSheetDialogFragment() {
     private var isPrivate: Boolean = false
     private val browserStore by lazy { requireComponents.core.store }
     private lateinit var menuStore: MenuStore
+    private var moreMenuExpanded = false
 
     private val deleteBrowsingDataController: DeleteBrowsingDataController by lazy {
         DefaultDeleteBrowsingDataController(
@@ -280,16 +282,16 @@ class MenuDialogFragment : BottomSheetDialogFragment() {
             val descCustom = stringResource(R.string.browser_custom_tab_menu_handlebar_content_description)
             val descMain = stringResource(R.string.browser_close_main_menu_handlebar_content_description)
 
-            var handlebarContentDescription by remember {
+            var handlebarContentDescription by rememberSaveable {
                 mutableStateOf(if (args.accesspoint == MenuAccessPoint.External) descCustom else descMain)
             }
 
-            var isExtensionsExpanded by remember { mutableStateOf(false) }
+            var isExtensionsExpanded by rememberSaveable { mutableStateOf(false) }
 
             val isMoreMenuExpanded by remember {
                 menuStore.stateFlow.map { state -> state.isMoreMenuExpanded }
             }
-                .collectAsState(initial = false)
+                .collectAsState(initial = menuStore.state.isMoreMenuExpanded)
 
             val isTranslationsEnabled =
                 TranslationsEnabledSettings.dataStore(requireContext()).isEnabled.collectAsState(true)
@@ -864,19 +866,17 @@ class MenuDialogFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        moreMenuExpanded = savedInstanceState?.getBoolean(MORE_MENU_EXPANDED) ?: moreMenuExpanded
         menuStore =
-            fragmentStore(initialState = createInitialMenuState()) {
-                    MenuStore(
-                        initialState = it,
-                        middleware =
-                            listOf(
-                                createMenuDialogMiddleware(),
-                                createMenuNavigationMiddleware(),
-                                createMenuTelemetryMiddleware(),
-                            ),
-                    )
-                }
-                .value
+            MenuStore(
+                initialState = createInitialMenuState().copy(isMoreMenuExpanded = moreMenuExpanded),
+                middleware =
+                    listOf(
+                        createMenuDialogMiddleware(),
+                        createMenuNavigationMiddleware(),
+                        createMenuTelemetryMiddleware(),
+                    ),
+            )
 
         webExtensionsMenuBinding.set(
             feature =
@@ -925,6 +925,22 @@ class MenuDialogFragment : BottomSheetDialogFragment() {
                 menuStore.navigationEvents.collect(::handleNavigationEvent)
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(
+            MORE_MENU_EXPANDED,
+            if (::menuStore.isInitialized) menuStore.state.isMoreMenuExpanded else moreMenuExpanded,
+        )
+    }
+
+    override fun onDestroyView() {
+        if (::menuStore.isInitialized) {
+            moreMenuExpanded = menuStore.state.isMoreMenuExpanded
+        }
+        bottomSheetBehavior = null
+        super.onDestroyView()
     }
 
     private fun createInitialMenuState(): MenuState {
@@ -980,6 +996,7 @@ class MenuDialogFragment : BottomSheetDialogFragment() {
             materialAlertDialogBuilder = MaterialAlertDialogBuilder(requireContext()),
             topSitesMaxLimit = components.settings.topSitesMaxLimit,
             mainDispatcher = Dispatchers.Main,
+            scope = viewLifecycleOwner.lifecycleScope,
         )
     }
 

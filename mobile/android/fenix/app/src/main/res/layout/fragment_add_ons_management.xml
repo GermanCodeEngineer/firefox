@@ -4,6 +4,7 @@
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -25,6 +26,7 @@
                 android:id="@+id/admin_mode_switch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:saveEnabled="false"
                 android:text="@string/admin_mode_title" />
 
             <TextView
@@ -34,6 +36,54 @@
                 android:paddingStart="16dp"
                 android:text="@string/admin_mode_description"
                 android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <LinearLayout
+                android:id="@+id/admin_mode_auth_form"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/admin_mode_code_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/admin_mode_enter_code"
+                    app:errorEnabled="true">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/admin_mode_code"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:digits="0123456789"
+                        android:freezesText="true"
+                        android:imeOptions="actionDone"
+                        android:inputType="number"
+                        android:maxLength="6"
+                        android:saveEnabled="true"
+                        android:singleLine="true" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/admin_mode_code_validity"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/admin_mode_unlock"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:enabled="false"
+                    android:text="@string/admin_mode_unlock" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/admin_mode_open_app"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/admin_mode_open_app" />
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"

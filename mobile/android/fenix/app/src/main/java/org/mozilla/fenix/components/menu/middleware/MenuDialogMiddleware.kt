@@ -74,6 +74,7 @@ import org.mozilla.fenix.utils.Settings
  *   shortcut after the shortcut limit has been reached.
  * @param topSitesMaxLimit The maximum number of top sites the user can have.
  * @param mainDispatcher The [CoroutineDispatcher] for performing UI updates.
+ * @param scope The scope for work owned by the menu view.
  */
 @Suppress("LongParameterList", "CyclomaticComplexMethod")
 class MenuDialogMiddleware(
@@ -92,11 +93,11 @@ class MenuDialogMiddleware(
     private val migratePrivateTabUseCase: TabsUseCases.MigratePrivateTabUseCase,
     private val materialAlertDialogBuilder: MaterialAlertDialogBuilder,
     private val topSitesMaxLimit: Int,
-    private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
+    mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
+    private val scope: CoroutineScope = CoroutineScope(mainDispatcher + SupervisorJob()),
 ) : Middleware<MenuState, MenuAction> {
 
     private val logger = Logger("MenuDialogMiddleware")
-    private val scope = CoroutineScope(mainDispatcher + SupervisorJob())
 
     override fun invoke(
         store: Store<MenuState, MenuAction>,

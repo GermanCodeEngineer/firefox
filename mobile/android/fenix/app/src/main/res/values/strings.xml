@@ -291,6 +291,8 @@
     <string name="admin_mode_authenticator_setup">Set up authenticator</string>
     <string name="admin_mode_emergency_recovery">Emergency recovery</string>
     <string name="admin_mode_enter_code">Enter your authenticator code</string>
+    <string name="admin_mode_unlock">Unlock</string>
+    <string name="admin_mode_code_validity">Codes remain valid for 100 seconds after they first appear. Each code can only be used once.</string>
     <string name="admin_mode_setup_title">Set up authenticator protection</string>
     <string name="admin_mode_setup_instructions">Scan this QR code with an authenticator app, save the recovery code, then enter the six-digit code from the app.</string>
     <string name="admin_mode_recovery_code_label">Recovery code: %1$s</string>

@@ -20,6 +20,7 @@ const TOTP_LAST_STEP_PREF = "extensions.managementRestrictions.totpLastStep";
 const TOTP_FAILURES_PREF = "extensions.managementRestrictions.totpFailures";
 const TOTP_LOCKOUT_PREF = "extensions.managementRestrictions.totpLockoutUntil";
 const TOTP_STEP_SECONDS = 30;
+const TOTP_VALIDITY_SECONDS = 100;
 const TOTP_MAX_FAILURES = 5;
 const TOTP_LOCKOUT_MS = 5 * 60 * 1000;
 
@@ -95,8 +96,13 @@ async function getTotp(secret, step) {
 }
 
 async function matchingTotpStep(secret, code) {
-  const currentStep = Math.floor(Date.now() / 1000 / TOTP_STEP_SECONDS);
-  for (const step of [currentStep - 1, currentStep, currentStep + 1]) {
+  const nowSeconds = Date.now() / 1000;
+  const currentStep = Math.floor(nowSeconds / TOTP_STEP_SECONDS);
+  const oldestStep = Math.max(
+    0,
+    Math.floor((nowSeconds - TOTP_VALIDITY_SECONDS) / TOTP_STEP_SECONDS) + 1
+  );
+  for (let step = currentStep + 1; step >= oldestStep; step--) {
     if ((await getTotp(secret, step)) === code) {
       return step;
     }

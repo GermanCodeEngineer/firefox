@@ -29,12 +29,14 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.R as materialR
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import mozilla.components.browser.engine.gecko.await
@@ -54,9 +56,12 @@ import org.mozilla.fenix.ext.runIfFragmentIsAttached
 import org.mozilla.fenix.ext.showToolbar
 import org.mozilla.fenix.settings.SupportUtils.AMO_HOMEPAGE_FOR_ANDROID
 import org.mozilla.fenix.theme.ThemeManager
+import org.mozilla.gecko.util.GeckoBundle
 import org.mozilla.geckoview.AdminModeController
 import org.mozilla.geckoview.ExperimentalGeckoViewApi
-import org.mozilla.gecko.util.GeckoBundle
+
+private const val TOTP_QR_CODE_SIZE = 512
+private const val TOTP_QR_IMAGE_SIZE = 224
 
 /** Fragment use for managing add-ons. */
 @Suppress("TooManyFunctions", "LargeClass")
@@ -68,6 +73,9 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management),
     private var addons: List<Addon> = emptyList()
 
     private var adapter: AddonsManagerAdapter? = null
+
+    private var adminModeAuthView: AdminModeAuthView? = null
+    private var adminModeRequestInFlight = false
 
     private val appShortcut by lazy { AdminModeAppShortcut(requireContext().applicationContext) }
 
@@ -82,12 +90,20 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management),
         super.onResume()
         showToolbar(getString(R.string.preferences_extensions))
         refreshAdminModeState()
+        updateShortcutButton()
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        adminModeAuthView?.refresh()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         // letting go of the resources to avoid memory leak.
         adapter = null
+        adminModeAuthView = null
+        adminModeRequestInFlight = false
         binding = null
     }
 
@@ -98,80 +114,67 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management),
                 navController = findNavController(),
                 onInstallButtonClicked = ::installAddon,
                 onMoreAddonsButtonClicked = ::openAMO,
-                isInstallEnabled = { binding?.adminModeSwitch?.isChecked == true },
+                isInstallEnabled = { adminModeAuthView?.adminModeEnabled == true },
                 onLearnMoreClicked = { link, addon ->
                     binding?.root?.openLearnMoreLink(link, addon)
                 },
             )
 
-        val recyclerView = binding?.addOnsList
-        recyclerView?.layoutManager = LinearLayoutManager(requireContext())
-        val shouldRefresh = adapter != null
-
-        lifecycleScope.launch(IO) {
+        val addonManager = provideAddonManager()
+        val context = requireContext()
+        viewLifecycleOwner.lifecycleScope.launch {
             try {
-                addons = requireContext().components.addonManager.getAddons()
-                lifecycleScope.launch(Dispatchers.Main) {
-                    runIfFragmentIsAttached {
-                        if (!shouldRefresh) {
-                            adapter =
-                                AddonsManagerAdapter(
-                                    addonsManagerDelegate = managementView,
-                                    addons = addons,
-                                    style = createAddonStyle(requireContext()),
-                                    store = requireComponents.core.store,
-                                )
+                addons = withContext(IO) { addonManager.getAddons() }
+                val safeBinding = binding ?: return@launch
+                adapter =
+                    AddonsManagerAdapter(
+                            addonsManagerDelegate = managementView,
+                            addons = addons,
+                            style = createAddonStyle(context),
+                            store = requireComponents.core.store,
+                        )
+                        .apply {
+                            stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
                         }
-                        binding?.addOnsProgressBar?.isVisible = false
-                        binding?.addOnsEmptyMessage?.isVisible = false
+                safeBinding.addOnsProgressBar.isVisible = false
+                safeBinding.addOnsEmptyMessage.isVisible = false
 
-                        recyclerView?.adapter = adapter
-                        recyclerView?.accessibilityDelegate =
-                            object : View.AccessibilityDelegate() {
-                                override fun onInitializeAccessibilityNodeInfo(
-                                    host: View,
-                                    info: AccessibilityNodeInfo,
-                                ) {
-                                    super.onInitializeAccessibilityNodeInfo(host, info)
-
-                                    adapter?.let {
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                                            info.collectionInfo =
-                                                AccessibilityNodeInfo.CollectionInfo(
-                                                    it.itemCount,
-                                                    1,
-                                                    false,
-                                                )
-                                        } else {
-                                            @Suppress("DEPRECATION")
-                                            info.collectionInfo =
-                                                AccessibilityNodeInfo.CollectionInfo.obtain(
-                                                    it.itemCount,
-                                                    1,
-                                                    false,
-                                                )
-                                        }
+                safeBinding.addOnsList.apply {
+                    layoutManager = LinearLayoutManager(context)
+                    adapter = this@AddonsManagementFragment.adapter
+                    accessibilityDelegate =
+                        object : View.AccessibilityDelegate() {
+                            override fun onInitializeAccessibilityNodeInfo(
+                                host: View,
+                                info: AccessibilityNodeInfo,
+                            ) {
+                                super.onInitializeAccessibilityNodeInfo(host, info)
+                                this@AddonsManagementFragment.adapter?.let {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                        info.collectionInfo =
+                                            AccessibilityNodeInfo.CollectionInfo(
+                                                it.itemCount,
+                                                1,
+                                                false,
+                                            )
+                                    } else {
+                                        @Suppress("DEPRECATION")
+                                        info.collectionInfo =
+                                            AccessibilityNodeInfo.CollectionInfo.obtain(
+                                                it.itemCount,
+                                                1,
+                                                false,
+                                            )
                                     }
                                 }
                             }
-
-                        if (shouldRefresh) {
-                            adapter?.updateAddons(addons)
                         }
-                    }
                 }
             } catch (e: AddonManagerException) {
-                lifecycleScope.launch(Dispatchers.Main) {
-                    runIfFragmentIsAttached {
-                        binding?.let {
-                            showSnackBar(
-                                it.root,
-                                getString(addonsR.string.mozac_feature_addons_failed_to_load_extensions),
-                            )
-                        }
-                        binding?.addOnsProgressBar?.isVisible = false
-                        binding?.addOnsEmptyMessage?.isVisible = true
-                    }
+                binding?.let {
+                    showSnackBar(it.root, getString(addonsR.string.mozac_feature_addons_failed_to_load_extensions))
+                    it.addOnsProgressBar.isVisible = false
+                    it.addOnsEmptyMessage.isVisible = true
                 }
             }
         }
@@ -200,7 +203,7 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management),
     }
 
     internal fun installAddon(addon: Addon) {
-        if (binding?.adminModeSwitch?.isChecked != true) {
+        if (adminModeAuthView?.adminModeEnabled != true) {
             binding?.root?.let {
                 showSnackBar(it, getString(R.string.admin_mode_authentication_required))
             }
@@ -236,7 +239,7 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management),
                     },
                 )
         binding?.addonProgressOverlay?.cancelButton?.setOnClickListener {
-            lifecycleScope.launch(Dispatchers.Main) {
+            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
                 val safeBinding = binding
                 // Hide the installation progress overlay once cancellation is successful.
                 if (installOperation.cancel().await()) {
@@ -255,19 +258,13 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management),
     }
 
     private fun bindAdminModeControls() {
-        binding?.adminModeSwitch?.setOnCheckedChangeListener { _, enabled ->
-            if (enabled) {
-                lifecycleScope.launch {
-                    val state = runCatching { AdminModeController.getState().await() }.getOrNull()
-                    if (state?.getBoolean("totpConfigured") == true) {
-                        promptForAuthenticatorCode { code -> setAdminMode(enabled, code) }
-                    } else {
-                        setAdminMode(enabled, "")
-                    }
-                }
-            } else {
-                setAdminMode(false, "")
-            }
+        adminModeAuthView = binding?.let {
+            AdminModeAuthView(
+                binding = it,
+                onToggle = { enabled -> setAdminMode(enabled, "") },
+                onUnlock = { code -> setAdminMode(true, code) },
+                onOpenApp = ::openShortcutApp,
+            )
         }
         binding?.adminModeTotpSetup?.setOnClickListener { beginTotpSetup() }
         binding?.adminModeRecovery?.setOnClickListener { showEmergencyRecoveryPrompt() }
@@ -275,88 +272,73 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management),
     }
 
     private fun refreshAdminModeState() {
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             val state = runCatching { AdminModeController.getState().await() }.getOrNull() ?: return@launch
-            val safeBinding = binding ?: return@launch
-            safeBinding.adminModeSwitch.setOnCheckedChangeListener(null)
-            safeBinding.adminModeSwitch.isChecked = state.getBoolean("enabled")
-            safeBinding.adminModeSwitch.setOnCheckedChangeListener { _, enabled ->
-                if (enabled && state.getBoolean("totpConfigured")) {
-                    promptForAuthenticatorCode { code -> setAdminMode(enabled, code) }
-                } else {
-                    setAdminMode(enabled, "")
-                }
-            }
-            safeBinding.adminModeTotpSetup.isEnabled = state.getBoolean("enabled")
-            safeBinding.adminModeRecovery.isEnabled = state.getBoolean("totpConfigured")
+            ensureActive()
+            adminModeAuthView?.updateState(
+                enabled = state.getBoolean("enabled"),
+                configured = state.getBoolean("totpConfigured"),
+                inFlight = adminModeRequestInFlight,
+            )
             adapter?.updateAddons(addons)
         }
     }
 
     private fun setAdminMode(enabled: Boolean, code: String) {
-        binding?.adminModeSwitch?.isEnabled = false
-        lifecycleScope.launch {
+        if (adminModeRequestInFlight) {
+            return
+        }
+        adminModeRequestInFlight = true
+        adminModeAuthView?.setBusy(true)
+        viewLifecycleOwner.lifecycleScope.launch {
             val changed = runCatching { AdminModeController.setEnabled(enabled, code).await() }.getOrDefault(false)
+            ensureActive()
+            adminModeRequestInFlight = false
+            adminModeAuthView?.setBusy(false)
             refreshAdminModeState()
-            binding?.adminModeSwitch?.isEnabled = true
             if (changed != true) {
-                binding?.root?.let {
-                    showSnackBar(it, getString(R.string.admin_mode_authentication_failed))
-                }
+                if (enabled) {
+                    adminModeAuthView?.authenticationFailed()
+                } else
+                    binding?.root?.let {
+                        showSnackBar(it, getString(R.string.admin_mode_authentication_failed))
+                    }
             }
         }
     }
 
-    private fun promptForAuthenticatorCode(onCode: (String) -> Unit) {
-        val input = EditText(requireContext()).apply {
-            inputType = InputType.TYPE_CLASS_NUMBER
-            hint = getString(R.string.admin_mode_enter_code)
-        }
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.admin_mode_title)
-            .setView(input)
-            .setNegativeButton(android.R.string.cancel) { _, _ -> refreshAdminModeState() }
-            .setNeutralButton(shortcutButtonLabel(), null)
-            .setPositiveButton(android.R.string.ok, null)
-            .create()
-            .also { dialog ->
-                dialog.setOnShowListener {
-                    dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
-                        if (appShortcut.selectedComponent != null) {
-                            if (appShortcut.launch(requireActivity())) {
-                                return@setOnClickListener
-                            }
-                            Toast.makeText(requireContext(), R.string.admin_mode_app_unavailable, Toast.LENGTH_LONG).show()
-                        }
-                        chooseShortcutApp {
-                            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setText(shortcutButtonLabel())
-                        }
-                    }
-                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                        onCode(input.text.toString())
-                        dialog.dismiss()
-                    }
-                }
-                dialog.show()
+    private fun openShortcutApp() {
+        if (appShortcut.selectedComponent != null) {
+            if (appShortcut.launch(requireActivity())) {
+                return
             }
+            Toast.makeText(requireContext(), R.string.admin_mode_app_unavailable, Toast.LENGTH_LONG).show()
+        }
+        chooseShortcutApp()
     }
 
-    private fun shortcutButtonLabel() = if (appShortcut.selectedComponent == null) {
-        R.string.admin_mode_choose_app
-    } else {
-        R.string.admin_mode_open_app
+    private fun shortcutButtonLabel() =
+        if (appShortcut.selectedComponent == null) {
+            R.string.admin_mode_choose_app
+        } else {
+            R.string.admin_mode_open_app
+        }
+
+    private fun updateShortcutButton() {
+        binding?.adminModeOpenApp?.setText(shortcutButtonLabel())
     }
 
-    private fun chooseShortcutApp(onSelectionChanged: () -> Unit = {}) {
+    private fun chooseShortcutApp() {
         val shortcut = appShortcut
         viewLifecycleOwner.lifecycleScope.launch {
             val apps = withContext(IO) { shortcut.availableApps() }
             if (binding == null) {
                 return@launch
             }
-            val builder = MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.admin_mode_choose_app)
-                .setNegativeButton(android.R.string.cancel, null)
+            val builder =
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.admin_mode_choose_app)
+                    .setNegativeButton(android.R.string.cancel, null)
             if (apps.isEmpty()) {
                 builder.setMessage(R.string.admin_mode_no_apps)
             } else {
@@ -365,14 +347,14 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management),
                     apps.indexOfFirst { it.component == appShortcut.selectedComponent },
                 ) { dialog, position ->
                     appShortcut.selectedComponent = apps[position].component
-                    onSelectionChanged()
+                    updateShortcutButton()
                     dialog.dismiss()
                 }
             }
             if (appShortcut.selectedComponent != null) {
                 builder.setNeutralButton(R.string.admin_mode_remove_shortcut) { _, _ ->
                     appShortcut.selectedComponent = null
-                    onSelectionChanged()
+                    updateShortcutButton()
                 }
             }
             builder.show()
@@ -380,8 +362,9 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management),
     }
 
     private fun beginTotpSetup() {
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             val setup = runCatching { AdminModeController.beginTotpSetup().await() }.getOrNull()
+            ensureActive()
             if (setup == null) {
                 return@launch
             }
@@ -389,38 +372,51 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management),
         }
     }
 
-    private fun showTotpSetupDialog(setup: GeckoBundle) {
-        val context = requireContext()
-        val content = LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_HORIZONTAL
-            setPadding(32, 12, 32, 0)
-        }
-        val qr = ImageView(context).apply {
-            val matrix = QRCodeWriter().encode(setup.getString("otpauthURI"), BarcodeFormat.QR_CODE, 512, 512)
-            val bitmap = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888)
-            for (x in 0 until 512) {
-                for (y in 0 until 512) {
-                    bitmap.setPixel(x, y, if (matrix[x, y]) android.graphics.Color.BLACK else android.graphics.Color.WHITE)
+    private fun createTotpQrCode(context: Context, uri: String): ImageView {
+        return ImageView(context).apply {
+            val matrix = QRCodeWriter().encode(uri, BarcodeFormat.QR_CODE, TOTP_QR_CODE_SIZE, TOTP_QR_CODE_SIZE)
+            val bitmap = Bitmap.createBitmap(TOTP_QR_CODE_SIZE, TOTP_QR_CODE_SIZE, Bitmap.Config.ARGB_8888)
+            for (x in 0 until TOTP_QR_CODE_SIZE) {
+                for (y in 0 until TOTP_QR_CODE_SIZE) {
+                    bitmap.setPixel(
+                        x,
+                        y,
+                        if (matrix[x, y]) android.graphics.Color.BLACK else android.graphics.Color.WHITE,
+                    )
                 }
             }
             setImageBitmap(bitmap)
             contentDescription = getString(R.string.admin_mode_setup_title)
-            layoutParams = LinearLayout.LayoutParams(224, 224)
+            layoutParams = LinearLayout.LayoutParams(TOTP_QR_IMAGE_SIZE, TOTP_QR_IMAGE_SIZE)
         }
+    }
+
+    private fun showTotpSetupDialog(setup: GeckoBundle) {
+        val context = requireContext()
+        val content =
+            LinearLayout(context).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER_HORIZONTAL
+                setPadding(32, 12, 32, 0)
+            }
+        val qr = createTotpQrCode(context, setup.getString("otpauthURI").orEmpty())
         content.addView(qr)
-        content.addView(TextView(context).apply {
-            text =
-                getString(R.string.admin_mode_setup_instructions) + "\n\n" +
-                    getString(
-                        R.string.admin_mode_recovery_code_label,
-                        setup.getString("recoveryCode", ""),
-                    )
-        })
-        val code = EditText(context).apply {
-            inputType = InputType.TYPE_CLASS_NUMBER
-            hint = getString(R.string.admin_mode_enter_code)
-        }
+        content.addView(
+            TextView(context).apply {
+                text =
+                    getString(R.string.admin_mode_setup_instructions) +
+                        "\n\n" +
+                        getString(
+                            R.string.admin_mode_recovery_code_label,
+                            setup.getString("recoveryCode", ""),
+                        )
+            }
+        )
+        val code =
+            EditText(context).apply {
+                inputType = InputType.TYPE_CLASS_NUMBER
+                hint = getString(R.string.admin_mode_enter_code)
+            }
         content.addView(code)
 
         MaterialAlertDialogBuilder(context)
@@ -432,14 +428,17 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management),
             .also { dialog ->
                 dialog.setOnShowListener {
                     dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                        lifecycleScope.launch {
+                        viewLifecycleOwner.lifecycleScope.launch {
                             val success = runCatching {
                                 AdminModeController.completeTotpSetup(
-                                    setup.getString("secret", ""),
-                                    setup.getString("recoveryCode", ""),
-                                    code.text.toString(),
-                                ).await()
-                            }.getOrDefault(false)
+                                        setup.getString("secret", ""),
+                                        setup.getString("recoveryCode", ""),
+                                        code.text.toString(),
+                                    )
+                                    .await()
+                            }
+                                .getOrDefault(false)
+                            ensureActive()
                             if (success == true) {
                                 dialog.dismiss()
                                 refreshAdminModeState()
@@ -458,17 +457,19 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management),
 
     private fun showEmergencyRecoveryPrompt() {
         val context = requireContext()
-        val content = LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(32, 12, 32, 0)
-        }
+        val content =
+            LinearLayout(context).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(32, 12, 32, 0)
+            }
         content.addView(TextView(context).apply { text = getString(R.string.admin_mode_recovery_warning) })
         val promise = CheckBox(context).apply { text = getString(R.string.admin_mode_recovery_promise) }
         content.addView(promise)
-        val code = EditText(context).apply {
-            inputType = InputType.TYPE_CLASS_TEXT
-            hint = getString(R.string.admin_mode_emergency_recovery)
-        }
+        val code =
+            EditText(context).apply {
+                inputType = InputType.TYPE_CLASS_TEXT
+                hint = getString(R.string.admin_mode_emergency_recovery)
+            }
         content.addView(code)
         MaterialAlertDialogBuilder(context)
             .setTitle(R.string.admin_mode_emergency_recovery)
@@ -482,10 +483,12 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management),
                     action.isEnabled = false
                     promise.setOnCheckedChangeListener { _, checked -> action.isEnabled = checked }
                     action.setOnClickListener {
-                        lifecycleScope.launch {
+                        viewLifecycleOwner.lifecycleScope.launch {
                             val recovered = runCatching {
                                 AdminModeController.recover(code.text.toString(), promise.isChecked).await()
-                            }.getOrDefault(false)
+                            }
+                                .getOrDefault(false)
+                            ensureActive()
                             if (recovered == true) {
                                 dialog.dismiss()
                                 refreshAdminModeState()

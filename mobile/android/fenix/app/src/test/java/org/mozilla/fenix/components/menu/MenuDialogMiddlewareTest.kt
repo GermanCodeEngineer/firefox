@@ -16,7 +16,11 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import kotlin.test.assertNotNull
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -122,6 +126,23 @@ class MenuDialogMiddlewareTest {
             coEvery { addonManager.getAddons() } returns emptyList()
         }
     }
+
+    @Test
+    fun `destroying the menu view cancels pending addon loading`() =
+        runTest(testDispatcher) {
+            val pendingAddons = CompletableDeferred<List<Addon>>()
+            coEvery { addonManager.getAddons() } coAnswers { pendingAddons.await() }
+            val viewScope = CoroutineScope(testDispatcher + SupervisorJob())
+            val store = createStore(menuState = MenuState(), scope = viewScope)
+            testScheduler.runCurrent()
+            coVerify { addonManager.getAddons() }
+
+            viewScope.cancel()
+            pendingAddons.complete(listOf(mockk(relaxed = true)))
+            testScheduler.advanceUntilIdle()
+
+            assertTrue(store.state.extensionMenuState.recommendedAddons.isEmpty())
+        }
 
     @Test
     fun `GIVEN no selected tab WHEN init action is dispatched THEN browser state is not updated`() =
@@ -1134,6 +1155,7 @@ class MenuDialogMiddlewareTest {
 
     @OptIn(ExperimentalCoroutinesApi::class) // UnconfinedTestDispatcher
     private fun TestScope.createStore(
+        scope: CoroutineScope = CoroutineScope(testDispatcher + SupervisorJob()),
         appStore: AppStore = AppStore(),
         summarizationEligibilityChecker: SummarizationEligibilityChecker = TestSummarizationEligibilityChecker(),
         menuState: MenuState =
@@ -1169,6 +1191,7 @@ class MenuDialogMiddlewareTest {
                             materialAlertDialogBuilder = alertDialogBuilder,
                             topSitesMaxLimit = TOP_SITES_MAX_COUNT,
                             mainDispatcher = testDispatcher,
+                            scope = scope,
                         )
                     ),
             )
