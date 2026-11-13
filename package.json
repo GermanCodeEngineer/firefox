@@ -54,15 +54,14 @@
     "windows-run": "set MOZILLABUILD=C:\\mozilla-build&& mach.cmd run",
     "windows-build-package": "npm run windows-build && npm run windows-package",
     "windows-build-run": "npm run windows-build && npm run windows-run",
-    "android-configure": "./mach configure",
-    "android-build": "./mach build",
-    "android-build-apk": "./mach gradle --no-configuration-cache --max-workers=2 -Dorg.gradle.parallel=false fenix:assembleDebug",
-    "android-build-run": "npm run android-build && npm run android-build-apk && ./mach run --app=fenix",
-    "android-install-build": "npm run android-build && npm run android-build-apk && ./mach android install-fenix",
-    "android-install-apk": "adb install -r objdir-frontend/gradle/build/mobile/android/fenix/app/outputs/apk/debug/fenix-arm64-v8a-debug.apk",
+    "android-configure": "MOZCONFIG=mozconfig.android ./mach configure",
+    "android-build": "MOZCONFIG=mozconfig.android ./mach build",
+    "android-build-apk": "npm run mach-gradle -- fenix:assembleDebug",
+    "android-build-run": "npm run android-build-install && MOZCONFIG=mozconfig.android ./mach run --app=fenix",
+    "android-install-apk": "npm run mach-gradle -- fenix:installDebug",
     "android-check-abi": "unzip -l objdir-frontend/gradle/build/mobile/android/fenix/app/outputs/apk/debug/fenix-arm64-v8a-debug.apk | grep 'lib/arm64-v8a/libxul.so'",
-    "android-build-install": "MOZCONFIG=objdir-frontend/.mozconfig npm run android-build && MOZCONFIG=objdir-frontend/.mozconfig npm run android-build-apk && npm run android-check-abi && npm run android-install-apk",
-    "mach-gradle": "./mach gradle --no-configuration-cache --max-workers=2 -Dorg.gradle.parallel=false fenix:assembleDebug"
+    "android-build-install": "npm run android-build && npm run android-build-apk && npm run android-check-abi && npm run android-install-apk",
+    "mach-gradle": "MOZCONFIG=mozconfig.android ./mach gradle --no-configuration-cache --max-workers=2 -Dorg.gradle.parallel=false"
   },
   "notes(private)": "We don't want to publish to npm, so this is marked as private",
   "private": true
